@@ -14,6 +14,7 @@
       "typescript": "^5.1.3"
     },
     "scripts": {
+      "tsc": "tsc",
       "build-ts": "npx tsc",
       "copy-migrations": "cp -r src/db/postgres/migrations build/src/db/postgres/migrations",
       "migrate": "npm run copy-migrations && node build/src/db/postgres/migration_runner.js",
