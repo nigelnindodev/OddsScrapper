@@ -24,3 +24,8 @@ export interface BetProviderConfig {
     version: string;
     games: BetProviderGameConfig[];
 }
+
+export interface SimpleWebPage {
+    html: string;
+    forUrl: string;
+}
