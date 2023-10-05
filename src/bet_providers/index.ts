@@ -1,7 +1,7 @@
-import { getConfig } from "../..";
-import { readFileAsync } from "../file_system";
-import { BetProviderConfig, BetProviderGameConfig, BetProviders, Games } from "../types/common";
-import { Result } from "../types/result_type";
+import { getConfig } from "..";
+import { readFileAsync } from "../utils/file_system";
+import { BetProviderConfig, BetProviderGameConfig, BetProviders, Games } from "../utils/types/common";
+import { Result } from "../utils/types/result_type";
 
 const {logger} = getConfig();
 
@@ -16,7 +16,7 @@ export abstract class BetProvider {
 
     abstract getSupportedGames(): Games[]
 
-    protected async getConfig(): Promise<Result<BetProviderConfig, Error>> {
+    public async getConfig(): Promise<Result<BetProviderConfig, Error>> {
         const readFileResult = await readFileAsync(this.configPath);
         if (readFileResult.result === "success") {
             try {
@@ -33,6 +33,8 @@ export abstract class BetProvider {
                         url: game.url
                     });
                 });
+
+                logger.trace(`${this.name} config parsed successfully`, betProviderGameConfig);
 
                 return {
                     result: "success",

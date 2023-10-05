@@ -1,4 +1,4 @@
-import { BetProviders, Games } from "../types/common";
+import { BetProviders, Games } from "../utils/types/common";
 import { BetProvider } from ".";
 
 export class BetikaProvider extends BetProvider {
