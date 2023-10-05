@@ -1,7 +1,7 @@
 import { DataSource } from "typeorm";
 
 import { Config, getConfig } from "../../index";
-import { Result } from "../../utils/result_type/index";
+import { Result } from "../../utils/types/result_type/index";
 
 const {logger} = getConfig();
 

@@ -2,7 +2,7 @@ import {createClient} from "redis";
 import type {RedisClientType} from "redis";
 
 import { getConfig } from "../../index";
-import { Result } from "../../utils/result_type/index";
+import { Result } from "../../utils/types/result_type/index";
 
 const {logger} = getConfig();
 
