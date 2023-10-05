@@ -3,7 +3,7 @@ import { BetProvider } from ".";
 
 export class BetikaProvider extends BetProvider {
     constructor() {
-        super(BetProviders.BETIKA);
+        super(BetProviders.BETIKA, "src/config/betika.json");
     }
 
     override getSupportedGames(): Games[] {

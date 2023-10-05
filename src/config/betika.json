@@ -1,0 +1,10 @@
+{
+    "version": "1.0.0",
+    "games": [
+        {
+            "name": "Tennis Singles",
+            "betType": "Two Way",
+            "url": "todo"
+        }
+    ]
+}

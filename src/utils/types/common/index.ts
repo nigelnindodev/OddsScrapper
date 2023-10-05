@@ -13,3 +13,14 @@ export enum BetTypes {
     TWO_WAY = "Two Way", // win or loss
     THREE_WAY = "Three Way" // win, draw or loss
 }
+
+export interface BetProviderGameConfig {
+    name: BetProviders;
+    betType: BetTypes;
+    url: string;
+}
+
+export interface BetProviderConfig {
+    version: string;
+    games: BetProviderGameConfig[];
+}
