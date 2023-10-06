@@ -1,3 +1,5 @@
+import { setInterval } from "timers/promises";
+
 import { BaseScrapper } from "..";
 import { getConfig } from "../../..";
 import { BetProvider } from "../../../bet_providers";
@@ -24,23 +26,44 @@ export class BetikaScrapper extends BaseScrapper {
             const browserInstance = await this.initializeBrowserInstance();
 
             betProviderConfig.games.forEach(async game => {
-                // first lets test out the result of fetching only one page.
-                const completedUrl = `${game.url}&page=1`;
-                const getHmlResult = await getHtmlForPage(browserInstance, completedUrl, PuppeteerPageLoadPolicy.DOM_CONTENT_LOADED);
+                let pageNumber = 1;
 
-                const metadata = {
-                    providerName: this.betProvider.name,
-                    game: game.name,
-                    url: completedUrl
-                };
+                //@ts-ignore
+                for await (const value of setInterval(3000, 0)) {
+                    const completedUrl = `${game.url}&page=${pageNumber}`;
 
-                if (getHmlResult.result === "success") {
-                    logger.info("Successfully fetched html for url", metadata);
-                    logger.trace(getHmlResult.value);
-                } else {
-                    logger.error("An error occurred while fetching html for page", metadata);
+                    const metadata = {
+                        providerName: this.betProvider.name,
+                        game: game.name,
+                        url: completedUrl
+                    };
+
+                    logger.info("New request to fetch game events: ", metadata);
+
+                    const getHtmlResult = await getHtmlForPage(browserInstance, completedUrl, PuppeteerPageLoadPolicy.DOM_CONTENT_LOADED);
+
+                    if (getHtmlResult.result === "success") {
+                        logger.info("Successfully fetched html for url", metadata);
+                        if (this.pageHasNoGameEvents(getHtmlResult.value.html)) {
+                            logger.info("No game events found. Stopping HTML fetch for current game.", metadata);
+                            break; 
+                        } else {
+                            logger.info("Game events found.", metadata);
+                            pageNumber = pageNumber + 1; // increment page count to move to the next page
+                        }
+                    } else {
+                        logger.error("An error occurred while fetching html for page", metadata);
+                        break; 
+                    }
                 }
-            });
+            }); 
+
+            /**
+             * We will need a different strategy of closing the browser instance once we are done collecting the info we need.
+             * The current problem is since our code is async the close function is called 
+             */
+            // logger.info("Closing browser instance for fetching provider games.", {providerName: this.betProvider.name});
+            //await browserInstance.close();
 
             return {
                 result: "success",
@@ -49,5 +72,14 @@ export class BetikaScrapper extends BaseScrapper {
         } else {
             return getBetProviderConfigResult;
         }
+    }
+
+    /**
+     * Current implementation optimistically checks for new game events in subsequent pages from the start point page 1 of events.
+     * This functions terminates checking for new game events when the page does not have any more events.
+     */
+    //@ts-ignore
+    private pageHasNoGameEvents(html: string): boolean {
+        return html.includes("No matches available for this filter");
     }
 }

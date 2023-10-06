@@ -24,7 +24,7 @@ export async function getHtmlForPage(
         const page1 = await browser.newPage();
         await page1.goto(url, {waitUntil: waitUntilPolicy});
         const html = await page1.content();
-        await browser.close();
+        await page1.close();
         return {result: "success", value: {html, forUrl: url}};
     } catch (e: any) {
         const message = `An exception occurred while fetching simple web page for url | ${url}`
