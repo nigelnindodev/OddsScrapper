@@ -15,7 +15,7 @@ export enum BetTypes {
 }
 
 export interface BetProviderGameConfig {
-    name: BetProviders;
+    name: Games;
     betType: BetTypes;
     url: string;
 }
@@ -28,4 +28,15 @@ export interface BetProviderConfig {
 export interface SimpleWebPage {
     html: string;
     forUrl: string;
+}
+
+/**
+ * Puppeteer defined policies for specifying when a page has been opened.
+ * Use default LOAD policy is unsure of why you would need other policies.
+ */
+export enum PuppeteerPageLoadPolicy {
+    LOAD = "load", // default policy, when load event is fired
+    DOM_CONTENT_LOADED = "domcontentloaded",
+    NETWORK_IDLE_0 = "networkidle0",
+    NETWORK_IDLE_2 = "networkidle2"
 }
