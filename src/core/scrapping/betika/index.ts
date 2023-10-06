@@ -1,3 +1,6 @@
+//@ts-ignore
+import * as cheerio from 'cheerio';
+
 import { BaseScrapper } from "..";
 import { getConfig } from "../../..";
 import { BetProvider } from "../../../bet_providers";
@@ -24,9 +27,11 @@ export class BetikaScrapper extends BaseScrapper {
             const browserInstance = await this.initializeBrowserInstance();
 
             betProviderConfig.games.forEach(async game => {
-                // first lets test out the result of fetching only one page.
-                const completedUrl = `${game.url}&page=1`;
-                const getHmlResult = await getHtmlForPage(browserInstance, completedUrl, PuppeteerPageLoadPolicy.DOM_CONTENT_LOADED);
+                let pageNumber = 1;
+                //@ts-ignore
+                let gamesUnavailable = false;
+
+                const completedUrl = `${game.url}&page=${pageNumber}`;
 
                 const metadata = {
                     providerName: this.betProvider.name,
@@ -34,13 +39,27 @@ export class BetikaScrapper extends BaseScrapper {
                     url: completedUrl
                 };
 
-                if (getHmlResult.result === "success") {
+                logger.info("About to fetch game events.", metadata);
+
+                const getHtmlResult = await getHtmlForPage(browserInstance, completedUrl, PuppeteerPageLoadPolicy.LOAD);
+
+                if (getHtmlResult.result === "success") {
                     logger.info("Successfully fetched html for url", metadata);
-                    logger.trace(getHmlResult.value);
+                    if (this.pageHasNoGameEvents(getHtmlResult.value.html)) {
+                        logger.info("No game events found. Stopping fetch HTML.", metadata);
+                        gamesUnavailable = true;
+                    } else {
+                        logger.info("Game events found.", metadata);
+                        // TODO: Push raw HTML to downstream processor
+                        pageNumber = pageNumber + 1; // increment to process the next page of game events 
+                    }
                 } else {
                     logger.error("An error occurred while fetching html for page", metadata);
+                    gamesUnavailable = true;
                 }
             });
+
+            await browserInstance.close();
 
             return {
                 result: "success",
@@ -49,5 +68,17 @@ export class BetikaScrapper extends BaseScrapper {
         } else {
             return getBetProviderConfigResult;
         }
+    }
+
+    /**
+     * Current implementation optimistically checks for new game events in subsequent pages from the start point page 1 of events.
+     * This functions terminates checking for new game events when the page does not have any more events.
+     */
+    private pageHasNoGameEvents(html: string): boolean {
+        return html.includes("No matches available for this filter");
+        /*
+        if (html.includes("No matches available for this filter"))
+        const $ = cheerio.load(html);
+        */
     }
 }

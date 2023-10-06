@@ -22,9 +22,13 @@ export async function getHtmlForPage(
     ): Promise<Result<SimpleWebPage, Error>> {
     try {
         const page1 = await browser.newPage();
+        logger.trace("Opened page.");
         await page1.goto(url, {waitUntil: waitUntilPolicy});
+        logger.trace("Opened url.");
         const html = await page1.content();
-        await browser.close();
+        logger.trace("Fetched content.");
+        await page1.close();
+        logger.trace("Closed page.")
         return {result: "success", value: {html, forUrl: url}};
     } catch (e: any) {
         const message = `An exception occurred while fetching simple web page for url | ${url}`
