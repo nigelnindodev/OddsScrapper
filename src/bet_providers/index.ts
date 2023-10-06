@@ -26,6 +26,7 @@ export abstract class BetProvider {
                 const version: string = jsonData["version"];
                 const games: any[] = jsonData["games"];
 
+                // TODO: Possible non-enum values for name or betType? Need more verification here.
                 games.forEach(game => {
                     betProviderGameConfig.push({
                         name: game.name,

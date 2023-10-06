@@ -6,6 +6,10 @@ import { Result } from "../../utils/types/result_type/index";
 
 const {logger} = getConfig();
 
+/**
+ * Not that all connections currently assume localhost connection.
+ * May need to be changed later to also add support for remote redis connections.
+ */
 export class RedisSingleton {
     private static subscriber: RedisClientType;
     private static publisher: RedisClientType;

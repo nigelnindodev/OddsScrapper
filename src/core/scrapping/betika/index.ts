@@ -7,21 +7,26 @@ import { BetikaProvider } from "../../../bet_providers/betika";
 import { PuppeteerPageLoadPolicy } from "../../../utils/types/common";
 import { Result } from "../../../utils/types/result_type";
 import { getHtmlForPage } from "../simple_scraper";
+import { RedisSingleton } from "../../../datastores/redis";
+import { getRedisHtmlParserChannelName } from "../../../utils/redis";
 
 const {logger} = getConfig();
 
 export class BetikaScrapper extends BaseScrapper {
-    override betProvider: BetProvider;
+    public override betProvider: BetProvider;
+    public override scrapeIntervalDuration: number;
 
     constructor() {
         super();
         this.betProvider = new BetikaProvider();
+        this.scrapeIntervalDuration = 10000;
     }
 
     public async fetchData(): Promise<Result<boolean, Error>> {
         const getBetProviderConfigResult = await this.betProvider.getConfig();
+        const getRedisPublisherResult = await RedisSingleton.getPublisher();
 
-        if (getBetProviderConfigResult.result === "success") {
+        if (getBetProviderConfigResult.result === "success" && getRedisPublisherResult.result === "success") {
             const betProviderConfig = getBetProviderConfigResult.value;
             const browserInstance = await this.initializeBrowserInstance();
 
@@ -29,11 +34,11 @@ export class BetikaScrapper extends BaseScrapper {
                 let pageNumber = 1;
 
                 //@ts-ignore
-                for await (const value of setInterval(3000, 0)) {
+                for await (const value of setInterval(this.scrapeIntervalDuration, 0)) {
                     const completedUrl = `${game.url}&page=${pageNumber}`;
 
                     const metadata = {
-                        providerName: this.betProvider.name,
+                        betProviderName: this.betProvider.name,
                         game: game.name,
                         url: completedUrl
                     };
@@ -49,6 +54,16 @@ export class BetikaScrapper extends BaseScrapper {
                             break; 
                         } else {
                             logger.info("Game events found.", metadata);
+                            this.publishRawHtmlToRedis(
+                                getRedisPublisherResult.value,
+                                getRedisHtmlParserChannelName(this.betProvider, game),
+                                {
+                                    betProviderName: this.betProvider.name,
+                                    betType: game.betType,
+                                    fromUrl: completedUrl,
+                                    gameName: game.name
+                                }
+                            );
                             pageNumber = pageNumber + 1; // increment page count to move to the next page
                         }
                     } else {
@@ -70,7 +85,25 @@ export class BetikaScrapper extends BaseScrapper {
                 value: true
             };
         } else {
-            return getBetProviderConfigResult;
+            // We are catching multiple errors within the if statement, so we have to narrow down to the actual error to return a result.
+            if (getBetProviderConfigResult.result === "error") {
+                return getBetProviderConfigResult;
+            } 
+            if (getRedisPublisherResult.result === "error") {
+                return getRedisPublisherResult;
+            }
+
+            /**
+             * Adding the code below to remote TypeScript compile errors, but this code is almost guaranteed not to run due to the above 
+             * if conditionals.
+             * 
+             * TODO: There has to be a more elegant way to handle such a scenario where we can check for multiple error conditions, and
+             * still not have to handle them individually? Sort of like a flatMap To: No Error | Some Errors | All Errors.
+             */
+            return {
+                result: "success",
+                value: false
+            }
         }
     }
 

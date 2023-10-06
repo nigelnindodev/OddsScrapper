@@ -32,11 +32,18 @@ export interface SimpleWebPage {
 
 /**
  * Puppeteer defined policies for specifying when a page has been opened.
- * Use default LOAD policy is unsure of why you would need other policies.
+ * Use default LOAD policy if unsure of why you would need other policies.
  */
 export enum PuppeteerPageLoadPolicy {
     LOAD = "load", // default policy, when load event is fired
     DOM_CONTENT_LOADED = "domcontentloaded",
     NETWORK_IDLE_0 = "networkidle0",
     NETWORK_IDLE_2 = "networkidle2"
+}
+
+export interface RawHtmlForProcessingMessage {
+    betProviderName: BetProviders;
+    betType: BetTypes;
+    fromUrl: string;
+    gameName: Games;
 }
