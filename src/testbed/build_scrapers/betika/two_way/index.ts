@@ -26,7 +26,6 @@ class BetikaTwoWayTestBed {
                  * we used before to separate player/club names.
                  */
 
-                //@ts-ignore
                 const clubsAndOdds = $(element).find("div.teams-info-vert.big-screen");
                 logger.trace("Club A: ", $(clubsAndOdds).find("div.teams-info-vert-left > a > div:nth-child(1)").text().trim());
                 logger.trace("Club B: ", $(clubsAndOdds).find("div.teams-info-vert-left > a > div:nth-child(2)").text().trim());

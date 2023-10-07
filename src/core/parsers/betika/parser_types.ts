@@ -9,42 +9,26 @@ const {logger} = getConfig();
 
 export function processBetikaTwoWayGamesHtml(html: string): Result<any[], Error>  {
     const gameEvents: any[] = [];
-    logger.trace(html);
     const $ = cheerio.load(html);
-
     try {
-        $("table.highlights--item").each((_, element) => {
-            const gameDescription: string = $(element).find(".game").find(".clubs").text();
-            const playerNames = (gameDescription.split("v."));
-
-            const moreDetails = $(element).find(".league").find("tbody > tr > td:nth-child(2)").text();
-            const gameTimeProviderId = moreDetails.split("- ID").map(val => val.trim());
-            // set timezone to provider timezone, ensure we parse timezone correctly
+        $("div:not(.odds-title).game.highlights--item").each((_, element) => {
             momentTz.tz.setDefault(TimeZones.NAIROBI);
-            const gameTime = momentTz(gameTimeProviderId[0], "DD/MM HH:mm");
-
+            const clubsAndOdds = $(element).find("div.teams-info-vert.big-screen");
             gameEvents.push({
-                details: {
-                    playerOneWin: {
-                        name: playerNames[0] === undefined ? "undefined_home_name" : playerNames[0].trim(),
-                        odd: Number($(element).find(".odds .clubone").find("td").find(".odd").text())
-                    },
-                    playerTwoWin: {
-                        name: playerNames[1] === undefined ? "undefined_away_name" : playerNames[1].trim(),
-                        odd: Number($(element).find(".odds .clubtwo").find("td").find(".odd").text())
-                    },
-                    gameDescription: gameDescription,
-                    estimatedStartTimeUtc: gameTime.toDate(), // converts to utc with timezone details
-                    betProviderGameId: gameTimeProviderId[1]
-                    //scrapeId: this.scrapeId,
-                    //sport: scrapeConfig.sport,
-                    //league: scrapeConfig.league
-                }
+                clubA: $(clubsAndOdds).find("div.teams-info-vert-left > a > div:nth-child(1)").text().trim(),
+                clubB: $(clubsAndOdds).find("div.teams-info-vert-left > a > div:nth-child(2)").text().trim(),
+                estimatedStartTimeUtc: momentTz(
+                    $(element).find("div.teams-info-meta.big-screen > div.teams-info-meta-right").text().trim(),
+                    "DD/MM HH:mm").toDate(),
+                league: $(element).find("div.teams-info-meta.big-screen > div.teams-info-meta-left").text().trim(),
+                oddsAWin: Number($(clubsAndOdds).find("button.match-odd.odd1 > div.odds__value").text().trim()),
+                oddsBWin: Number($(clubsAndOdds).find("button.match-odd.odd2 > div.odds__value").text().trim()),
+                link: $(clubsAndOdds).find("div.teams-info-vert-left > a").attr("href"),
             });
         });
         return {result: "success", value: gameEvents};
     } catch (e: any) {
-        logger.error('An error occurred while parsing Betika two way html: ', e.message);
+        logger.error('An error occurred while parsing Betika two way html data: ', e.message);
         return {result: "error", value: new Error(e.message)};
     }
 }
