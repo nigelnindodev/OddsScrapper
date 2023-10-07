@@ -23,7 +23,7 @@ export function processBetikaTwoWayGamesHtml(html: string): Result<any[], Error>
                 league: $(element).find("div.teams-info-meta.big-screen > div.teams-info-meta-left").text().trim(),
                 oddsAWin: Number($(clubsAndOdds).find("button.match-odd.odd1 > div.odds__value").text().trim()),
                 oddsBWin: Number($(clubsAndOdds).find("button.match-odd.odd2 > div.odds__value").text().trim()),
-                link: $(clubsAndOdds).find("div.teams-info-vert-left > a").attr("href"),
+                link: $(clubsAndOdds).find("div.teams-info-vert-left > a").attr("href")
             });
         });
         return {result: "success", value: gameEvents};
@@ -50,7 +50,7 @@ export function processBetikaThreeWayGamesHtml(html: string): Result<any[], Erro
                 oddsAWin: Number($(clubsAndOdds).find("button.match-odd.odd1 > div.odds__value").text().trim()),
                 oddsDraw: Number($(clubsAndOdds).find("button.match-odd.odd2 > div.odds__value").text().trim()),
                 oddsBWin: Number($(clubsAndOdds).find("button.match-odd.odd3 > div.odds__value").text().trim()),
-                link: $(clubsAndOdds).find("div.teams-info-vert-left > a").attr("href"),
+                link: $(clubsAndOdds).find("div.teams-info-vert-left > a").attr("href")
             });
         });
         return {result: "success", value: gameEvents};
