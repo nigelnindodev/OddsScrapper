@@ -61,7 +61,8 @@ export class BetikaScrapper extends BaseScrapper {
                                     betProviderName: this.betProvider.name,
                                     betType: game.betType,
                                     fromUrl: completedUrl,
-                                    gameName: game.name
+                                    gameName: game.name,
+                                    rawHtml: getHtmlResult.value.html
                                 }
                             );
                             pageNumber = pageNumber + 1; // increment page count to move to the next page

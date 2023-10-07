@@ -46,4 +46,5 @@ export interface RawHtmlForProcessingMessage {
     betType: BetTypes;
     fromUrl: string;
     gameName: Games;
+    rawHtml: string;
 }
