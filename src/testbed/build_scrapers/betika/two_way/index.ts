@@ -29,11 +29,11 @@ class BetikaTwoWayTestBed {
                 const clubsAndOdds = $(element).find("div.teams-info-vert.big-screen");
                 logger.trace("Club A: ", $(clubsAndOdds).find("div.teams-info-vert-left > a > div:nth-child(1)").text().trim());
                 logger.trace("Club B: ", $(clubsAndOdds).find("div.teams-info-vert-left > a > div:nth-child(2)").text().trim());
-                logger.trace("Odd One: ", Number($(clubsAndOdds).find("button.match-odd.odd1 > div.odds__value").text().trim()));
-                logger.trace("Odd Two: ", Number($(clubsAndOdds).find("button.match-odd.odd2 > div.odds__value").text().trim()));
+                logger.trace("Odd A: ", Number($(clubsAndOdds).find("button.match-odd.odd1 > div.odds__value").text().trim()));
+                logger.trace("Odd B: ", Number($(clubsAndOdds).find("button.match-odd.odd2 > div.odds__value").text().trim()));
                 logger.trace("Tournament: ", $(element).find("div.teams-info-meta.big-screen > div.teams-info-meta-left").text().trim());
                 logger.trace("DateTime String: ", $(element).find("div.teams-info-meta.big-screen > div.teams-info-meta-right").text().trim());
-                logger.trace("Unique ID: ", $(clubsAndOdds).find("div.teams-info-vert-left > a").attr("href"));
+                logger.trace("Link: ", $(clubsAndOdds).find("div.teams-info-vert-left > a").attr("href"));
                 console.log("\n");
             });
         } else {
