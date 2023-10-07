@@ -54,4 +54,8 @@ export class BetikaParser extends BaseParser {
         }
     }
 
+    // @ts-ignore
+    private async processRawHtmlMessage(parsedMessage: RawHtmlForProcessingMessage) {
+
+    }
 }

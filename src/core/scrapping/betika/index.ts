@@ -24,13 +24,19 @@ export class BetikaScrapper extends BaseScrapper {
 
     public async fetchData(): Promise<Result<boolean, Error>> {
         const getBetProviderConfigResult = await this.betProvider.getConfig();
+
+        if (getBetProviderConfigResult.result === "error") {
+            logger.error("failed to load config for provider: ", this.betProvider.name);
+            return getBetProviderConfigResult;
+        }
+
         const getRedisPublisherResult = await RedisSingleton.getPublisher();
 
-        if (getBetProviderConfigResult.result === "success" && getRedisPublisherResult.result === "success") {
+        if (getRedisPublisherResult.result === "success") {
             const betProviderConfig = getBetProviderConfigResult.value;
             const browserInstance = await this.initializeBrowserInstance();
 
-            betProviderConfig.games.forEach(async game => {
+            const results = betProviderConfig.games.map(async game => {
                 let pageNumber = 1;
 
                 //@ts-ignore
@@ -72,39 +78,18 @@ export class BetikaScrapper extends BaseScrapper {
                         break; 
                     }
                 }
-            }); 
+            });
 
-            /**
-             * We will need a different strategy of closing the browser instance once we are done collecting the info we need.
-             * The current problem is since our code is async the close function is called 
-             */
-            // logger.info("Closing browser instance for fetching provider games.", {providerName: this.betProvider.name});
-            //await browserInstance.close();
+            // wait for promises to complete before closing the browser
+            await Promise.all(results);
+            await browserInstance.close();
 
             return {
                 result: "success",
                 value: true
             };
         } else {
-            // We are catching multiple errors within the if statement, so we have to narrow down to the actual error to return a result.
-            if (getBetProviderConfigResult.result === "error") {
-                return getBetProviderConfigResult;
-            } 
-            if (getRedisPublisherResult.result === "error") {
-                return getRedisPublisherResult;
-            }
-
-            /**
-             * Adding the code below to remote TypeScript compile errors, but this code is almost guaranteed not to run due to the above 
-             * if conditionals.
-             * 
-             * TODO: There has to be a more elegant way to handle such a scenario where we can check for multiple error conditions, and
-             * still not have to handle them individually? Sort of like a flatMap To: No Error | Some Errors | All Errors.
-             */
-            return {
-                result: "success",
-                value: false
-            }
+            return getRedisPublisherResult;
         }
     }
 
