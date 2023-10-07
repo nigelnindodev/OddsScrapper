@@ -9,11 +9,11 @@ const {logger} = getConfig();
 
 export function processBetikaTwoWayGamesHtml(html: string): Result<any[], Error>  {
     const gameEvents: any[] = [];
+    logger.trace(html);
     const $ = cheerio.load(html);
 
     try {
         $("table.highlights--item").each((_, element) => {
-            logger.trace("Found highight item");
             const gameDescription: string = $(element).find(".game").find(".clubs").text();
             const playerNames = (gameDescription.split("v."));
 

@@ -1,5 +1,5 @@
-import { BetikaProvider } from "./bet_providers/betika";
-import { BetikaScrapper } from "./core/scrapping/betika";
+import { BetikaProvider } from "../bet_providers/betika";
+import { BetikaScrapper } from "../core/scrapping/betika";
 
 const betikaProvider = new BetikaProvider();
 betikaProvider.getConfig();

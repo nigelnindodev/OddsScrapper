@@ -9,6 +9,7 @@ import { Result } from "../../../utils/types/result_type";
 import { getHtmlForPage } from "../simple_scraper";
 import { RedisSingleton } from "../../../datastores/redis";
 import { getRedisHtmlParserChannelName } from "../../../utils/redis";
+import { getRawHtmlDirectoryStorageName, writeFileAsync } from "../../../utils/file_system";
 
 const {logger} = getConfig();
 
@@ -60,6 +61,15 @@ export class BetikaScrapper extends BaseScrapper {
                             break; 
                         } else {
                             logger.info("Game events found.", metadata);
+                            const directory = getRawHtmlDirectoryStorageName(this.betProvider, game);
+                            const filePath = `${directory}${pageNumber}.html`;
+                            const htmlWriteResult =  await writeFileAsync(filePath, getHtmlResult.value.html);
+                            if (htmlWriteResult.result === "error") {
+                                logger.warn("Failed to write raw html file: ", {
+                                    fileName: filePath,
+                                    error: htmlWriteResult.value.message
+                                });
+                            }
                             this.publishRawHtmlToRedis(
                                 getRedisPublisherResult.value,
                                 getRedisHtmlParserChannelName(this.betProvider, game),

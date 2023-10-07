@@ -2,6 +2,18 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { Result } from "../types/result_type";
+import { BetProviderGameConfig } from "../types/common";
+import { BetProvider } from "../../bet_providers";
+import { getConfig } from "../..";
+
+const {logger} = getConfig();
+
+export function getRawHtmlDirectoryStorageName(betProvider: BetProvider, gameConfig: BetProviderGameConfig): string {
+    const directoryName = `data/raw_html/${betProvider.name}/${gameConfig.name.replace(" ", "")}/`;
+    logger.trace("Ensuring directory existence for the following path: ", directoryName);
+    ensureDirectoryExistence(directoryName);
+    return directoryName;
+}
 
 /**
  * Read a file and return ints contents as a string.
@@ -16,6 +28,26 @@ export async function readFileAsync(filePathFromRoot: string): Promise<Result<st
                 resolve({result: "error", value: Error(err.message)});
             } else {
                 resolve({result: "success", value: buffer.toString()});
+            }
+        });
+    });
+}
+
+/**
+ * Use function to write content to a file. 
+ * Can fail if the chosen directory from root does not exist. You may need to
+ * invoke `ensureDirectoryExistence` before calling this function.
+ * @param filePathFromRoot
+ * @param data 
+ * @returns 
+ */
+export async function writeFileAsync(filePathFromRoot: string, data: string): Promise<Result<boolean, Error>> {
+    return new Promise(resolve => {
+        fs.writeFile(filePathFromRoot, data, (err) => {
+            if (err) {
+                resolve({result: "error", value: Error(err.message)});
+            } else {
+                resolve({result: "success", value: true});
             }
         });
     });
