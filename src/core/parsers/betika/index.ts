@@ -4,9 +4,9 @@ import { BetProvider } from "../../../bet_providers";
 import { BetikaProvider } from "../../../bet_providers/betika";
 import { RedisSingleton } from "../../../datastores/redis";
 import { getRedisHtmlParserChannelName } from "../../../utils/redis";
-import { RawHtmlForProcessingMessage } from "../../../utils/types/common";
+import { BetTypes, RawHtmlForProcessingMessage } from "../../../utils/types/common";
 import { Result } from "../../../utils/types/result_type";
-import { processBetikaTwoWayGamesHtml } from "./parser_types";
+import { processBetikaThreeWayGamesHtml, processBetikaTwoWayGamesHtml } from "./parser_types";
 
 const {logger} = getConfig();
 
@@ -58,16 +58,34 @@ export class BetikaParser extends BaseParser {
     }
 
     private processRawHtmlMessage(parsedMessage: RawHtmlForProcessingMessage): void {
-        const results = processBetikaTwoWayGamesHtml(parsedMessage.rawHtml);
-        if (results.result === "success") {
-            logger.info("Successfully fetched games: ", results.value);
+        let results2;
+        switch (parsedMessage.betType) {
+            case BetTypes.TWO_WAY:
+                results2 = processBetikaTwoWayGamesHtml(parsedMessage.rawHtml);
+                break;
+            case BetTypes.THREE_WAY:
+                results2 = processBetikaThreeWayGamesHtml(parsedMessage.rawHtml);
+                break;
+            default:
+                const message = "Unknown bet type provided";
+                logger.error(message, {
+                    betProviderName: parsedMessage.betProviderName,
+                    betType: parsedMessage.betType,
+                    fromUrl: parsedMessage.fromUrl,
+                    gameName: parsedMessage.gameName
+                });
+                throw new Error(`Unknown bet type provided for provider: ${this.betProvider.name}`);
+        }
+
+        if (results2.result == "success") {
+            logger.info("Successfully fetched games: ", results2.value);
         } else {
             logger.error("Failed to parse html into games: ", {
                 betProviderName: parsedMessage.betProviderName,
                 betType: parsedMessage.betType,
                 fromUrl: parsedMessage.fromUrl,
                 gameName: parsedMessage.gameName,
-                errorMessage: results.value.message
+                errorMessage: results2.value.message
             });
         }
     }

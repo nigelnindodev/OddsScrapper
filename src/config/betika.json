@@ -5,6 +5,11 @@
             "name": "Tennis Singles",
             "betType": "Two Way",
             "url": "https://www.betika.com/lite/en-ke/?tab_id=-2&sub_type_id=1,186&sport_id=28"
+        },
+        {
+            "name": "Basketball",
+            "betType": "Three Way",
+            "url": "https://www.betika.com/lite/en-ke/?sport_id=30&tag_id=&tab_id=-2"
         }
     ]
 }
