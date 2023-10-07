@@ -48,3 +48,11 @@ export interface RawHtmlForProcessingMessage {
     gameName: Games;
     rawHtml: string;
 }
+
+/**
+ * Corresponds to moment.js timezones
+ */
+export enum TimeZones {
+    UTC = "UTC",
+    NAIROBI = "Africa/Nairobi"
+}

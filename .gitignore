@@ -4,7 +4,7 @@
 # Ignore built dist files
 build/**/*
 
-# Ignore CSV data files
+# Ignore data folder
 data/**/*
 
 # Ignore .env file

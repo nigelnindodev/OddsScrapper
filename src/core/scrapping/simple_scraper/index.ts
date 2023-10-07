@@ -1,3 +1,5 @@
+import { setTimeout } from "timers/promises";
+
 import * as puppeteer from 'puppeteer';
 
 import { Result } from '../../../utils/types/result_type';
@@ -23,6 +25,7 @@ export async function getHtmlForPage(
     try {
         const page1 = await browser.newPage();
         await page1.goto(url, {waitUntil: waitUntilPolicy});
+        await setTimeout(3000); // wait for some time before fetching content
         const html = await page1.content();
         await page1.close();
         return {result: "success", value: {html, forUrl: url}};

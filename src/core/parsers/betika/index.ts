@@ -6,6 +6,7 @@ import { RedisSingleton } from "../../../datastores/redis";
 import { getRedisHtmlParserChannelName } from "../../../utils/redis";
 import { RawHtmlForProcessingMessage } from "../../../utils/types/common";
 import { Result } from "../../../utils/types/result_type";
+import { processBetikaTwoWayGamesHtml } from "./parser_types";
 
 const {logger} = getConfig();
 
@@ -42,7 +43,9 @@ export class BetikaParser extends BaseParser {
                         fromUrl: parsedMessage.fromUrl,
                         gameName: parsedMessage.gameName
                     });
+                    this.processRawHtmlMessage(parsedMessage);
                 });
+                
                 return true;
             });
 
@@ -54,8 +57,18 @@ export class BetikaParser extends BaseParser {
         }
     }
 
-    // @ts-ignore
-    private async processRawHtmlMessage(parsedMessage: RawHtmlForProcessingMessage) {
-
+    private processRawHtmlMessage(parsedMessage: RawHtmlForProcessingMessage): void {
+        const results = processBetikaTwoWayGamesHtml(parsedMessage.rawHtml);
+        if (results.result === "success") {
+            logger.info("Successfully fetched games: ", results.value);
+        } else {
+            logger.error("Failed to parse html into games: ", {
+                betProviderName: parsedMessage.betProviderName,
+                betType: parsedMessage.betType,
+                fromUrl: parsedMessage.fromUrl,
+                gameName: parsedMessage.gameName,
+                errorMessage: results.value.message
+            });
+        }
     }
 }
