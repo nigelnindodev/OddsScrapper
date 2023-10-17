@@ -1,6 +1,7 @@
 export enum BetProviders {
     BETIKA = "BETIKA",
-    SPORTPESA = "SPORTPESA"
+    SPORTPESA = "SPORTPESA",
+    ORBIT = "ORBIT"
 }
 
 export enum Games {

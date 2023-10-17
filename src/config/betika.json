@@ -10,6 +10,11 @@
             "name": "Basketball",
             "betType": "Three Way",
             "url": "https://www.betika.com/lite/en-ke/?sport_id=30&tag_id=&tab_id=-2"
+        },
+        {
+            "name": "Football",
+            "betType": "Three Way",
+            "url": "https://www.betika.com/lite/en-ke/?tab_id=-2&page=9&sub_type_id=1,186&sport_id=14"
         }
     ]
 }

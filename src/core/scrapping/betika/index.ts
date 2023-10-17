@@ -23,6 +23,11 @@ export class BetikaScrapper extends BaseScrapper {
         this.scrapeIntervalDuration = 10000;
     }
 
+    /**
+     * Fetches data from Betika. Data is per sport from the lite version of the website,
+     * which is stored as pages, so fetching contains a mechanisms for scrolling to new pages.
+     * @returns 
+     */
     public async fetchData(): Promise<Result<boolean, Error>> {
         const getBetProviderConfigResult = await this.betProvider.getConfig();
 
@@ -55,7 +60,7 @@ export class BetikaScrapper extends BaseScrapper {
                     const getHtmlResult = await getHtmlForPage(browserInstance, completedUrl, PuppeteerPageLoadPolicy.DOM_CONTENT_LOADED);
 
                     if (getHtmlResult.result === "success") {
-                        logger.info("Successfully fetched html for url", metadata);
+                        logger.info("Successfully fetched html for url. ", metadata);
                         if (this.pageHasNoGameEvents(getHtmlResult.value.html)) {
                             logger.info("No game events found. Stopping HTML fetch for current game.", metadata);
                             break; 

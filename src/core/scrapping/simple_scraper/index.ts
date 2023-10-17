@@ -25,12 +25,12 @@ export async function getHtmlForPage(
     try {
         const page1 = await browser.newPage();
         await page1.goto(url, {waitUntil: waitUntilPolicy});
-        await setTimeout(3000); // wait for some time before fetching content
+        await setTimeout(15000); // wait for some time before fetching content
         const html = await page1.content();
         await page1.close();
         return {result: "success", value: {html, forUrl: url}};
     } catch (e: any) {
-        const message = `An exception occurred while fetching simple web page for url | ${url}`
+        const message = `An exception occurred while fetching simple web page for url | ${url}`;
         logger.error(message, e.message);
         return {result: "error", value: new Error(e.message)};
     }
