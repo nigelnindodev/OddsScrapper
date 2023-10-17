@@ -6,4 +6,3 @@ betikaProvider.getConfig();
 
 const betikaScrapper = new BetikaScrapper();
 betikaScrapper.fetchData();
-
