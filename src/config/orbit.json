@@ -5,6 +5,11 @@
             "name": "Football",
             "betType": "Three Way",
             "url": "https://www.orbitxch.com/customer/sport/1"
+        },
+        {
+            "name": "Tennis",
+            "betType": "Two Way",
+            "url": "https://www.orbitxch.com/customer/sport/2"
         }
     ]
 }

@@ -56,6 +56,10 @@ export class OrbitParser extends BaseParser {
             case BetTypes.THREE_WAY:
                 results2 = processOrbitThreeWayGamesHtml(parsedMessage.rawHtml);
                 break;
+            case BetTypes.TWO_WAY:
+                // Thinking that the parser should also work for two way games
+                results2 = processOrbitThreeWayGamesHtml(parsedMessage.rawHtml);
+                break;
             default:
                 const message = "Unknown bet type provided";
                 logger.error(message, {
