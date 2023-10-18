@@ -5,7 +5,7 @@ import { OrbitProvider } from "../../../bet_providers/orbit";
 import { RedisSingleton } from "../../../datastores/redis";
 import { PuppeteerPageLoadPolicy } from "../../../utils/types/common";
 import { Result } from "../../../utils/types/result_type";
-import { getHtmlForPage } from "../scrolling_scrapper";
+import { getHtmlForScrollingPage } from "../scrolling_scrapper";
 
 const {logger} = getConfig();
 
@@ -47,7 +47,15 @@ export class OrbitScrapper extends BaseScrapper {
 
                 logger.info("New request to fetch game events: ", metadata);
 
-                const getHtmlResult = await getHtmlForPage(browserInstance, game.url, PuppeteerPageLoadPolicy.LOAD);
+                const getHtmlResult = await getHtmlForScrollingPage(
+                    browserInstance,
+                    game.url,
+                    PuppeteerPageLoadPolicy.LOAD,
+                    ".biab_body.contentWrap", // scrollingElementSelector
+                    2000, // delayBeforeNextScrollAttemptMillis 
+                    30, // numScrollAttempts
+                    150 // scrollDelta
+                );
 
                 if (getHtmlResult.result === "success") {
                     logger.info("Successfully fetched html for url. ", metadata);

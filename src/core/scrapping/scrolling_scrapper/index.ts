@@ -8,17 +8,21 @@ import { getConfig } from '../../..';
 
 const {logger} = getConfig();
 
-export async function getHtmlForPage(
+export async function getHtmlForScrollingPage(
     browser: puppeteer.Browser,
     url: string,
-    waitUntilPolicy: PuppeteerPageLoadPolicy
+    waitUntilPolicy: PuppeteerPageLoadPolicy,
+    scrollingElementSelector: string,
+    delayBeforeNextScrollAttemptMillis: number,
+    numScrollAttempts: number,
+    scrollDelta: number
 ): Promise<Result<SimpleWebPage, Error>> {
     try {
         const page1 = await browser.newPage();
         await page1.setViewport({width: 1280, height: 720});
         await page1.goto(url, {waitUntil: waitUntilPolicy});
         await setTimeout(15000);
-        await getScrollContent(page1);
+        await getScrollContent(page1, scrollingElementSelector, delayBeforeNextScrollAttemptMillis, numScrollAttempts, scrollDelta);
         const html = await page1.content();
         return {result: "success", value: {html, forUrl: url}};
     } catch (e: any) {
@@ -32,33 +36,30 @@ export async function getHtmlForPage(
  * TODO: Move selector code to individual provider, but keep scroll behavior same across the board.
  * @param page 
  */
-async function getScrollContent(page: puppeteer.Page): Promise<boolean> {
+async function getScrollContent(
+    page: puppeteer.Page,
+    scrollingElementSelector: string,
+    delayBeforeNextScrollAttemptMillis: number,
+    numScrollAttempts: number,
+    scrollDelta: number): Promise<boolean> {
     logger.trace("Running scroll down function");
-    const section = await page.$('.biab_body.contentWrap'); // find containing body of the content. In this case it's a <div class="biab_body contentWrap">
+    const section = await page.$(scrollingElementSelector); // find containing body of the content. In this case it's a <div class="biab_body contentWrap">
     if (section !== null) {
-        logger.trace("Found section");
-
-        /**
-         * Using a set number of scrolls to fetch new content.
-         * Chose this method for simplicity, but a more advanced method 
-         * would check for no changes in the dimensions of the bounding 
-         * box to determine that no new content is available.
-         */
-        const numScrolls = 30;
+        logger.info("Found scroll section");
         let counter = 1;
-        const delayBetweenScrollsMills = 2000; // give time for the page to make AJAX call for new content.
 
-        for await (const value of setInterval(delayBetweenScrollsMills, numScrolls)) {
+        for await (const value of setInterval(delayBeforeNextScrollAttemptMillis, numScrollAttempts)) {
             if (counter > value) {
                 break; // stop scrolling for new data
             } else {
                 const boundingBox = await getBoundingBox(section);
-                scrollDown(page, boundingBox);
+                scrollDown(page, boundingBox, scrollDelta);
+                counter = counter + 1;
             }
         }
         return true;
     } else {
-        logger.trace("Failed to find section.");
+        logger.error("Failed to find scroll section.");
         return false;
     }
 }
@@ -78,7 +79,7 @@ async function getBoundingBox(elementHandle: puppeteer.ElementHandle): Promise<p
     }
 }
 
-async function scrollDown(page: puppeteer.Page, boundingBox: puppeteer.BoundingBox): Promise<void> {
+async function scrollDown(page: puppeteer.Page, boundingBox: puppeteer.BoundingBox, scrollDelta: number): Promise<void> {
     // move mouse to the center of the element to be scrolled
     page.mouse.move(
         boundingBox.x + boundingBox.width / 2,
@@ -86,5 +87,5 @@ async function scrollDown(page: puppeteer.Page, boundingBox: puppeteer.BoundingB
     );
 
     // use the mouse scroll wheel to to scroll. Change scroll down delta according to your needs.
-    await page.mouse.wheel({deltaY: 300});
+    await page.mouse.wheel({deltaY: scrollDelta});
 }
