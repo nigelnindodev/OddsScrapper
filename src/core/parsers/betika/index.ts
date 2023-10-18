@@ -66,6 +66,10 @@ export class BetikaParser extends BaseParser {
                 if (results2.result === "success") {
                     parsedResults = results2.value.map(item => {
                         return {
+                            type: BetTypes.TWO_WAY,
+                            betProviderId: item.link,
+                            clubA: item.clubA,
+                            clubB: item.clubB,
                             oddsAWin: item.oddsAWin,
                             oddsBWin: item.oddsBWin,
                             league: item.league,
@@ -84,6 +88,10 @@ export class BetikaParser extends BaseParser {
                 if (results2.result === "success") {
                     parsedResults = results2.value.map(item => {
                         return {
+                            type: BetTypes.THREE_WAY,
+                            betProviderId: item.link,
+                            clubA: item.clubA,
+                            clubB: item.clubB,
                             oddsAWin: item.oddsAWin,
                             oddsBWin: item.oddsBWin,
                             oddsDraw: item.oddsDraw,

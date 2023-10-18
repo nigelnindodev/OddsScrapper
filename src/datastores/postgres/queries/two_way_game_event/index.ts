@@ -1,6 +1,6 @@
 import { DataSource, InsertResult, UpdateResult } from "typeorm";
 import { BetProviders } from "../../../../utils/types/common";
-import { TwoWayGameEvent } from "../../../../utils/types/db";
+import { DbTwoWayGameEvent } from "../../../../utils/types/db";
 import { TwoWayGameEventEntity } from "../../entities";
 
 /**
@@ -26,21 +26,22 @@ export const getTwoWayGame = async (
 
 export const insertTwoWayGameEvent = async (
     dataSource: DataSource,
-    data: TwoWayGameEvent
+    data: DbTwoWayGameEvent
 ): Promise<InsertResult> => {
-    const toDataBase = {
+    return await dataSource.createQueryBuilder()
+    .insert()
+    .into(TwoWayGameEventEntity)
+    .values({
         bet_provider_id: data.betProviderId,
         bet_provider_name: data.betProviderName,
         club_a: data.clubA,
         club_b: data.clubB,
         odds_a_win: data.oddsAWin,
         odds_b_win: data.oddsBWin,
-        game_name: data.gameName
-    };
-    return await dataSource.createQueryBuilder()
-    .insert()
-    .into(TwoWayGameEventEntity)
-    .values(toDataBase)
+        game_name: data.gameName,
+        league: data.league,
+        meta_data: data.metaData
+    })
     .execute();
 };
 

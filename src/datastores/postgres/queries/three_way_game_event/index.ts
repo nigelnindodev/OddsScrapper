@@ -1,7 +1,10 @@
 import { DataSource, InsertResult, UpdateResult } from "typeorm";
 import { BetProviders } from "../../../../utils/types/common";
-import { ThreeWayGameEvent } from "../../../../utils/types/db";
+import { DbThreeWayGameEvent } from "../../../../utils/types/db";
 import { ThreeWayGameEventEntity } from "../../entities";
+import { getConfig } from "../../../..";
+
+const {logger} = getConfig();
 
 /**
  * Useful for checking whether a three way game event already exists for a provider.
@@ -26,21 +29,24 @@ export const getThreeWayGame = async (
 
 export const insertThreeWayGameEvent = async (
     dataSource: DataSource,
-    data: ThreeWayGameEvent
+    data: DbThreeWayGameEvent
 ): Promise<InsertResult> => {
-    const toDataBase = {
+    logger.trace("Inserting into database: ", data);
+    return await dataSource.createQueryBuilder()
+    .insert()
+    .into(ThreeWayGameEventEntity)
+    .values({
         bet_provider_id: data.betProviderId,
         bet_provider_name: data.betProviderName,
         club_a: data.clubA,
         club_b: data.clubB,
         odds_a_win: data.oddsAWin,
         odds_b_win: data.oddsBWin,
-        game_name: data.gameName
-    }
-    return await dataSource.createQueryBuilder()
-    .insert()
-    .into(ThreeWayGameEventEntity)
-    .values(toDataBase)
+        odds_draw: data.oddsDraw,
+        game_name: data.gameName,
+        league: data.league,
+        meta_data: data.metaData
+    })
     .execute();
 };
 

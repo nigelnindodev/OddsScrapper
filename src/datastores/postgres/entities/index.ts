@@ -12,7 +12,7 @@ export class TwoWayGameEventEntity {
     id: number
 
     @Index("two_way_game_event_provider_id_idx")
-    @Column("string", {length: 100, nullable: false})
+    @Column("varchar", {length: 100, nullable: false})
     bet_provider_id: string
 
     @Column("varchar", {length: 100, nullable: false})
@@ -59,7 +59,7 @@ export class ThreeWayGameEventEntity {
     id: number
 
     @Index("three_way_game_event_provider_id_idx")
-    @Column("string", {length: 100, nullable: false})
+    @Column("varchar", {length: 100, nullable: false})
     bet_provider_id: string
 
     @Column("varchar", {length: 100, nullable: false})
@@ -79,7 +79,7 @@ export class ThreeWayGameEventEntity {
 
     @Index("three_way_game_event_bet_provider_idx")
     @Column("varchar", {length: 100, nullable: false})
-    bet_provider: BetProviders
+    bet_provider_name: BetProviders
 
     @Column("varchar", {length: 100, nullable: false})
     game_name: Games

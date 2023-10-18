@@ -6,7 +6,7 @@
 
 import { BetProviders, Games } from "../common";
 
-export interface TwoWayGameEvent {
+export interface DbTwoWayGameEvent {
     betProviderName: BetProviders;
     betProviderId: string;
     clubA: string;
@@ -18,7 +18,7 @@ export interface TwoWayGameEvent {
     metaData: string;
 }
 
-export interface ThreeWayGameEvent {
+export interface DbThreeWayGameEvent {
     betProviderName: BetProviders;
     betProviderId: string;
     clubA: string;

@@ -53,7 +53,14 @@ export function processBetikaThreeWayGamesHtml(html: string): Result<any[], Erro
                 link: $(clubsAndOdds).find("div.teams-info-vert-left > a").attr("href")
             });
         });
-        return {result: "success", value: gameEvents};
+
+        const filteredGameEvents = gameEvents.filter(event => {
+            return (event.oddsAWin !== null || event.oddsAWin !== undefined || !isNaN(event.oddsAWin)) &&
+            (event.oddsDraw !== null || event.oddsDraw !== undefined || !isNaN(event.oddsDraw)) &&
+            (event.oddsBWin !== null || event.oddsBWin !== undefined || !isNaN(event.oddsBWin));
+        });
+
+        return {result: "success", value: filteredGameEvents};
     } catch (e: any) {
         logger.error("An error occurred while parsing Betika two way html data: ", e.message);
         return {result: "error", value: new Error(e.message)};

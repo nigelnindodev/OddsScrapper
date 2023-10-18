@@ -56,6 +56,7 @@ export interface ProcessedHtmlMessage {
 }
 
 export interface BaseProcessedGameEvent {
+    betProviderId: string;
     clubA: string,
     clubB: string,
     estimatedStartTimeUtc: Date,

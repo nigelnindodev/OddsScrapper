@@ -2,6 +2,7 @@ import { DataSource } from "typeorm";
 
 import { Config, getConfig } from "../../index";
 import { Result } from "../../utils/types/result_type/index";
+import { ThreeWayGameEventEntity, TwoWayGameEventEntity } from "./entities";
 
 const {logger} = getConfig();
 
@@ -19,13 +20,14 @@ export class PostgresDataSourceSingleton {
                 username: config.postgresUser,
                 password: config.postgresPassword,
                 database: config.postgresDatabaseName,
-                synchronize: false,
+                synchronize: true,
                 logging: false, // TODO: maybe create a different logging structure for database logs?
                 extra: {
                     sss: true
                 },
                 entities: [
-                    
+                    TwoWayGameEventEntity,
+                    ThreeWayGameEventEntity
                 ]
             });
 
