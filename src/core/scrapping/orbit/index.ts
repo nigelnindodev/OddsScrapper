@@ -3,6 +3,7 @@ import { getConfig } from "../../..";
 import { BetProvider } from "../../../bet_providers";
 import { OrbitProvider } from "../../../bet_providers/orbit";
 import { RedisSingleton } from "../../../datastores/redis";
+import { getRedisHtmlParserChannelName } from "../../../utils/redis";
 import { PuppeteerPageLoadPolicy } from "../../../utils/types/common";
 import { Result } from "../../../utils/types/result_type";
 import { getHtmlForScrollingPage } from "../scrolling_scrapper";
@@ -60,6 +61,17 @@ export class OrbitScrapper extends BaseScrapper {
                 if (getHtmlResult.result === "success") {
                     logger.info("Successfully fetched html for url. ", metadata);
                     logger.info(getHtmlResult.value.html);
+                    this.publishRawHtmlToRedis(
+                        getRedisPublisherResult.value,
+                        getRedisHtmlParserChannelName(this.betProvider, game),
+                        {
+                            betProviderName: this.betProvider.name,
+                            betType: game.betType,
+                            fromUrl: game.url,
+                            gameName: game.name,
+                            rawHtml: getHtmlResult.value.html
+                        }
+                    );
                 } else {
                     logger.error("An error occurred while fetching html for page", metadata);
                 }
