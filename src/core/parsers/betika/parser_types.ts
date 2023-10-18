@@ -28,7 +28,7 @@ export function processBetikaTwoWayGamesHtml(html: string): Result<any[], Error>
         });
         return {result: "success", value: gameEvents};
     } catch (e: any) {
-        logger.error('An error occurred while parsing Betika two way html data: ', e.message);
+        logger.error("An error occurred while parsing Betika two way html data: ", e.message);
         return {result: "error", value: new Error(e.message)};
     }
 }
@@ -55,7 +55,7 @@ export function processBetikaThreeWayGamesHtml(html: string): Result<any[], Erro
         });
         return {result: "success", value: gameEvents};
     } catch (e: any) {
-        logger.error('An error occurred while parsing Betika two way html data: ', e.message);
+        logger.error("An error occurred while parsing Betika two way html data: ", e.message);
         return {result: "error", value: new Error(e.message)};
     }
 }

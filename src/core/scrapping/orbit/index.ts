@@ -54,13 +54,12 @@ export class OrbitScrapper extends BaseScrapper {
                     PuppeteerPageLoadPolicy.LOAD,
                     ".biab_body.contentWrap", // scrollingElementSelector
                     2000, // delayBeforeNextScrollAttemptMillis 
-                    30, // numScrollAttempts
+                    60, // numScrollAttempts
                     150 // scrollDelta
                 );
 
                 if (getHtmlResult.result === "success") {
                     logger.info("Successfully fetched html for url. ", metadata);
-                    logger.info(getHtmlResult.value.html);
                     this.publishRawHtmlToRedis(
                         getRedisPublisherResult.value,
                         getRedisHtmlParserChannelName(this.betProvider, game),

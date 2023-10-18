@@ -1,23 +1,24 @@
 import { BaseParser } from "..";
 import { getConfig } from "../../..";
 import { BetProvider } from "../../../bet_providers";
-import { BetikaProvider } from "../../../bet_providers/betika";
+import { OrbitProvider } from "../../../bet_providers/orbit";
 import { RedisSingleton } from "../../../datastores/redis";
 import { getRedisHtmlParserChannelName } from "../../../utils/redis";
 import { BetTypes, RawHtmlForProcessingMessage } from "../../../utils/types/common";
 import { Result } from "../../../utils/types/result_type";
-import { processBetikaThreeWayGamesHtml, processBetikaTwoWayGamesHtml } from "./parser_types";
+import { processOrbitThreeWayGamesHtml } from "./parser_types";
 
 const {logger} = getConfig();
 
-export class BetikaParser extends BaseParser {
+export class OrbitParser extends BaseParser {
     public override betProvider: BetProvider;
 
     constructor() {
         super();
-        this.betProvider = new BetikaProvider();
+        this.betProvider = new OrbitProvider();
     }
 
+    // TODO: This function should be moved to the base class
     public async subscribeToChannels(): Promise<Result<boolean, Error>> {
         const getBetProviderConfigResult = await this.betProvider.getConfig();
         if (getBetProviderConfigResult.result === "error") {
@@ -28,13 +29,7 @@ export class BetikaParser extends BaseParser {
         const getRedisSubscriberResult = await RedisSingleton.getSubscriber();
         if (getRedisSubscriberResult.result === "success") {
             const betProviderConfig = getBetProviderConfigResult.value;
-
             const results = betProviderConfig.games.map(async game => {
-                /**
-                 * Maybe in the future make this more resilient and add better error handling?
-                 * - Catch subscription failures
-                 * - Instead of just returning true, return object containing info about channel name, and whether successfully subscribed or not.
-                 */
                 await getRedisSubscriberResult.value.subscribe(getRedisHtmlParserChannelName(this.betProvider, game), message => {
                     const parsedMessage = JSON.parse(message) as RawHtmlForProcessingMessage;
                     logger.trace("Redis subscriber message received.", {
@@ -45,10 +40,8 @@ export class BetikaParser extends BaseParser {
                     });
                     this.processRawHtmlMessage(parsedMessage);
                 });
-                
                 return true;
             });
-
             await Promise.all(results);
             return {result: "success", value: true};
         } else {
@@ -60,11 +53,8 @@ export class BetikaParser extends BaseParser {
     private processRawHtmlMessage(parsedMessage: RawHtmlForProcessingMessage): void {
         let results2;
         switch (parsedMessage.betType) {
-            case BetTypes.TWO_WAY:
-                results2 = processBetikaTwoWayGamesHtml(parsedMessage.rawHtml);
-                break;
             case BetTypes.THREE_WAY:
-                results2 = processBetikaThreeWayGamesHtml(parsedMessage.rawHtml);
+                results2 = processOrbitThreeWayGamesHtml(parsedMessage.rawHtml);
                 break;
             default:
                 const message = "Unknown bet type provided";
@@ -78,7 +68,7 @@ export class BetikaParser extends BaseParser {
         }
 
         if (results2.result === "success") {
-            logger.info("Successfully fetched games: ", results2.value);
+            logger.info("Successfully fetched games", results2.value);
         } else {
             logger.error("Failed to parse html into games: ", {
                 betProviderName: parsedMessage.betProviderName,
