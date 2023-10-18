@@ -9,5 +9,9 @@ import { BetProviderGameConfig } from "../types/common";
  * @returns Channel name based on bet provider, game name and bet type. An example generated value is BETIKA_TennisSingles_TwoWay
  */
 export function getRedisHtmlParserChannelName(betProvider: BetProvider, gameConfig: BetProviderGameConfig): string {
-    return `${betProvider.name}_${gameConfig.name.replace(" ", "")}_${gameConfig.betType.replace(" ", "")}`
+    return `${betProvider.name}_${gameConfig.name.replace(" ", "")}_${gameConfig.betType.replace(" ", "")}`;
+}
+
+export function getRedisEventsChannelName(betProvider: BetProvider, gameConfig: BetProviderGameConfig): string {
+    return `event:${betProvider.name}_${gameConfig.name.replace(" ", "")}_${gameConfig.betType.replace(" ", "")}`;
 }

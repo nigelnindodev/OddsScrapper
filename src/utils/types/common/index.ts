@@ -58,3 +58,8 @@ export enum TimeZones {
     UTC = "UTC",
     NAIROBI = "Africa/Nairobi"
 }
+
+// TODO: Work on adding this in the future
+export enum GameStatus {
+
+}

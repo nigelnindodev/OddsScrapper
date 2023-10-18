@@ -1,5 +1,5 @@
 import * as path from "path";
-
+import "reflect-metadata";
 import "dotenv/config";
 import {ILogObj, Logger} from "tslog";
 
