@@ -1,5 +1,5 @@
 import { BetProvider } from "../../bet_providers";
-import { BetProviderGameConfig } from "../types/common";
+import { BetProviderGameConfig, BetTypes, Games } from "../types/common";
 
 /**
  * Generate the Redis pub/sub channel name for publishing raw HTML, and subscribers will parse the HTML into game events.
@@ -12,6 +12,6 @@ export function getRedisHtmlParserChannelName(betProvider: BetProvider, gameConf
     return `${betProvider.name}_${gameConfig.name.replace(" ", "")}_${gameConfig.betType.replace(" ", "")}`;
 }
 
-export function getRedisEventsChannelName(betProvider: BetProvider, gameConfig: BetProviderGameConfig): string {
-    return `event:${betProvider.name}_${gameConfig.name.replace(" ", "")}_${gameConfig.betType.replace(" ", "")}`;
+export function getRedisProcessedEventsChannelName(betProvider: BetProvider, gameName: Games, betType: BetTypes): string {
+    return `event:${betProvider.name}_${gameName.replace(" ", "")}_${betType.replace(" ", "")}`;
 }

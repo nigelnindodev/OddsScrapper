@@ -14,6 +14,8 @@ export interface TwoWayGameEvent {
     oddsAWin: number;
     oddsBWin: number;
     gameName: Games;
+    league: string;
+    metaData: string;
 }
 
 export interface ThreeWayGameEvent {
@@ -25,4 +27,6 @@ export interface ThreeWayGameEvent {
     oddsBWin: number;
     oddsDraw: number;
     gameName: Games;
+    league: string;
+    metaData: string;
 }

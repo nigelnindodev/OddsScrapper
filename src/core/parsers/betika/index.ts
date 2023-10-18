@@ -3,8 +3,8 @@ import { getConfig } from "../../..";
 import { BetProvider } from "../../../bet_providers";
 import { BetikaProvider } from "../../../bet_providers/betika";
 import { RedisSingleton } from "../../../datastores/redis";
-import { getRedisHtmlParserChannelName } from "../../../utils/redis";
-import { BetTypes, RawHtmlForProcessingMessage } from "../../../utils/types/common";
+import { getRedisProcessedEventsChannelName, getRedisHtmlParserChannelName } from "../../../utils/redis";
+import { BetTypes, ProcessedThreeWayGameEvent, ProcessedTwoWayGameEvent, RawHtmlForProcessingMessage } from "../../../utils/types/common";
 import { Result } from "../../../utils/types/result_type";
 import { processBetikaThreeWayGamesHtml, processBetikaTwoWayGamesHtml } from "./parser_types";
 
@@ -57,14 +57,46 @@ export class BetikaParser extends BaseParser {
         }
     }
 
-    private processRawHtmlMessage(parsedMessage: RawHtmlForProcessingMessage): void {
+    private async processRawHtmlMessage(parsedMessage: RawHtmlForProcessingMessage): Promise<void> {
         let results2;
+        let parsedResults: ProcessedTwoWayGameEvent[] | ProcessedThreeWayGameEvent[];
         switch (parsedMessage.betType) {
             case BetTypes.TWO_WAY:
                 results2 = processBetikaTwoWayGamesHtml(parsedMessage.rawHtml);
+                if (results2.result === "success") {
+                    parsedResults = results2.value.map(item => {
+                        return {
+                            oddsAWin: item.oddsAWin,
+                            oddsBWin: item.oddsBWin,
+                            league: item.league,
+                            estimatedStartTimeUtc: item.estimatedStartTimeUtc,
+                            meta: JSON.stringify({
+                                link: item.link
+                            })
+                        } as ProcessedTwoWayGameEvent;
+                    });
+                } else {
+                    throw new Error("Failed to process Betika two way games html");
+                }
                 break;
             case BetTypes.THREE_WAY:
                 results2 = processBetikaThreeWayGamesHtml(parsedMessage.rawHtml);
+                if (results2.result === "success") {
+                    parsedResults = results2.value.map(item => {
+                        return {
+                            oddsAWin: item.oddsAWin,
+                            oddsBWin: item.oddsBWin,
+                            oddsDraw: item.oddsDraw,
+                            league: item.league,
+                            estimatedStartTimeUtc: item.estimatedStartTimeUtc,
+                            meta: JSON.stringify({
+                                link: item.link
+                            })
+                        } as ProcessedThreeWayGameEvent;
+                    });
+                } else {
+                    throw new Error("Failed to process Betika Three way games html");
+                }
                 break;
             default:
                 const message = "Unknown bet type provided";
@@ -77,16 +109,28 @@ export class BetikaParser extends BaseParser {
                 throw new Error(`Unknown bet type provided for provider: ${this.betProvider.name}`);
         }
 
-        if (results2.result === "success") {
-            logger.info("Successfully fetched games: ", results2.value);
+        logger.info("Successfully fetched games: ", results2.value);
+        const getRedisPublisherResult = await RedisSingleton.getPublisher();
+
+        if (getRedisPublisherResult.result === "success") {
+            this.publishProcessedGameEvents(
+                getRedisPublisherResult.value,
+                getRedisProcessedEventsChannelName(this.betProvider, parsedMessage.gameName, parsedMessage.betType),
+                {
+                betProviderName: parsedMessage.betProviderName,
+                betType: parsedMessage.betType,
+                gameName: parsedMessage.gameName,
+                data: parsedResults
+                });
         } else {
-            logger.error("Failed to parse html into games: ", {
+            const message = "Failed to get redis publisher to send processed events: ";
+            logger.error(message, {
                 betProviderName: parsedMessage.betProviderName,
                 betType: parsedMessage.betType,
                 fromUrl: parsedMessage.fromUrl,
                 gameName: parsedMessage.gameName,
-                errorMessage: results2.value.message
-            });
+                errorMessage: getRedisPublisherResult.value.message
+            })
         }
     }
 }

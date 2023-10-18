@@ -51,6 +51,38 @@ export interface RawHtmlForProcessingMessage {
     rawHtml: string;
 }
 
+export interface ProcessedHtmlMessage {
+    value: any[]
+}
+
+export interface BaseProcessedGameEvent {
+    clubA: string,
+    clubB: string,
+    estimatedStartTimeUtc: Date,
+    league: string
+    meta: any // Store any additional metadata about a specific provider you would want here
+}
+
+export interface ProcessedTwoWayGameEvent extends BaseProcessedGameEvent {
+    type: BetTypes.TWO_WAY;
+    oddsAWin: number;
+    oddsBWin: number;
+}
+
+export interface ProcessedThreeWayGameEvent extends BaseProcessedGameEvent {
+    type: BetTypes.THREE_WAY;
+    oddsAWin: number;
+    oddsBWin: number;
+    oddsDraw: number;
+}
+
+export interface ProcessedGameEvents {
+    betProviderName: BetProviders;
+    betType: BetTypes;
+    gameName: Games;
+    data: ProcessedTwoWayGameEvent[] | ProcessedThreeWayGameEvent[];
+} 
+
 /**
  * Corresponds to moment.js timezones
  */

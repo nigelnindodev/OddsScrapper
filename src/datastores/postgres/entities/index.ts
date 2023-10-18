@@ -1,9 +1,11 @@
 import { Entity, Column, PrimaryGeneratedColumn, Index} from "typeorm";
+import { BetProviders, Games } from "../../../utils/types/common";
 
 /**
  * Table representing game events where there is no possibility of a draw.
  * A good example is tennis.
  */
+@Index(["bet_provider_id", "bet_provider_name"], {unique: true})
 @Entity({name: "two_way_game_event"})
 export class TwoWayGameEventEntity {
     @PrimaryGeneratedColumn()
@@ -25,11 +27,18 @@ export class TwoWayGameEventEntity {
     @Column("decimal", {nullable: false})
     odds_b_win: number
 
+    @Index("two_way_game_event_bet_provider_idx")
     @Column("varchar", {length: 100, nullable: false})
-    bet_provider_name: string
+    bet_provider_name: BetProviders
 
     @Column("varchar", {length: 100, nullable: false})
-    game_name: string
+    game_name: Games
+
+    @Column("varchar", {length: 100, nullable: false})
+    league: string
+
+    @Column("json", {nullable: false})
+    meta_data: string
 
     @Index("two_way_game_event_created_at_idx")
     @Column("timestamptz", {nullable: false, default: () => "CURRENT_TIMESTAMP"})
@@ -43,6 +52,7 @@ export class TwoWayGameEventEntity {
  * Table representing game events where the is possibility of a draw. A great
  * example is football.
  */
+@Index(["bet_provider_id", "bet_provider_name"], {unique: true})
 @Entity({name: "three_way_game_event"})
 export class ThreeWayGameEventEntity {
     @PrimaryGeneratedColumn()
@@ -67,11 +77,18 @@ export class ThreeWayGameEventEntity {
     @Column("decimal", {nullable: false})
     odds_draw: number
 
+    @Index("three_way_game_event_bet_provider_idx")
     @Column("varchar", {length: 100, nullable: false})
-    bet_provider: string
+    bet_provider: BetProviders
 
     @Column("varchar", {length: 100, nullable: false})
-    game_name: string
+    game_name: Games
+
+    @Column("varchar", {length: 100, nullable: false})
+    league: string
+
+    @Column("json", {nullable: false})
+    meta_data: string
 
     @Index("three_way_game_event_created_at_idx")
     @Column("timestamptz", {nullable: false, default: () => "CURRENT_TIMESTAMP"})
