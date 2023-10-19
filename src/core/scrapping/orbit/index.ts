@@ -60,7 +60,6 @@ export class OrbitScrapper extends BaseScrapper {
 
                 if (getHtmlResult.result === "success") {
                     logger.info("Successfully fetched html for url. ", metadata);
-                    logger.info(getHtmlResult.value.html);
                     this.publishRawHtmlToRedis(
                         getRedisPublisherResult.value,
                         getRedisHtmlParserChannelName(this.betProvider, game),

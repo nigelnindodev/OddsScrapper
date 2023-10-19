@@ -6,7 +6,7 @@ import { RedisSingleton } from "../../../datastores/redis";
 import { getRedisHtmlParserChannelName, getRedisProcessedEventsChannelName } from "../../../utils/redis";
 import { BetTypes, ProcessedThreeWayGameEvent, ProcessedTwoWayGameEvent, RawHtmlForProcessingMessage } from "../../../utils/types/common";
 import { Result } from "../../../utils/types/result_type";
-import { processOrbitThreeWayGamesHtml } from "./parser_types";
+import { processOrbitGamesHtml } from "./parser_types";
 
 const {logger} = getConfig();
 
@@ -54,8 +54,8 @@ export class OrbitParser extends BaseParser {
         let results2;
         let parsedResults: ProcessedTwoWayGameEvent[] | ProcessedThreeWayGameEvent[];
         switch (parsedMessage.betType) {
-            case BetTypes.THREE_WAY:
-                results2 = processOrbitThreeWayGamesHtml(parsedMessage.rawHtml);
+            case BetTypes.TWO_WAY:
+                results2 = processOrbitGamesHtml(parsedMessage.rawHtml);
                 if (results2.result === "success") {
                     parsedResults = results2.value.map(item => {
                         return {
@@ -63,20 +63,22 @@ export class OrbitParser extends BaseParser {
                             betProviderId: `${item.clubA}_${item.clubB}_${item.eventDate}`, // TODO: create id creator on specific betProvider class
                             clubA: item.clubA,
                             clubB: item.clubB,
-                            oddsAWin: item.oddsAWin,
-                            oddsBWin: item.oddsBWin,
+                            oddsAWin: (item.oddsArray[0], item.oddsArray[1]) / 2,
+                            oddsBWin: (item.oddsArray[2], item.oddsArray[3]) / 2,
                             league: "N/A",
                             estimatedStartTimeUtc: item.estimatedStartTimeUtc,
-                            meta: JSON.stringify({})
+                            meta: JSON.stringify({
+                                oddsArray: item.oddsArray
+                            })
                         };
                     });
                 } else {
                     throw new Error("Failed to process Orbit two way games html");
                 }
                 break;
-            case BetTypes.TWO_WAY:
+            case BetTypes.THREE_WAY:
                 // Thinking that the parser should also work for two way games
-                results2 = processOrbitThreeWayGamesHtml(parsedMessage.rawHtml);
+                results2 = processOrbitGamesHtml(parsedMessage.rawHtml);
                 if (results2.result === "success") {
                     parsedResults = results2.value.map(item => {
                         return {
@@ -84,12 +86,14 @@ export class OrbitParser extends BaseParser {
                             betProviderId: `${item.clubA}_${item.clubB}_${item.eventDate}`,
                             clubA: item.clubA,
                             clubB: item.clubB,
-                            oddsAWin: item.oddsAWin,
-                            oddsBWin: item.oddsBWin,
-                            oddsDraw: item.oddsDraw,
+                            oddsAWin: (item.oddsArray[0], item.oddsArray[1]) / 2,
+                            oddsBWin:(item.oddsArray[4], item.oddsArray[5]) / 2,
+                            oddsDraw: (item.oddsArray[2], item.oddsArray[3]) / 2,
                             league: "N/A",
                             estimatedStartTimeUtc: item.estimatedStartTimeUtc,
-                            meta: JSON.stringify({})
+                            meta: JSON.stringify({
+                                oddsArray: item.oddsArray
+                            })
                         }
                     });
                 } else {
@@ -121,6 +125,7 @@ export class OrbitParser extends BaseParser {
                     data: parsedResults
                 }
             );
+            logger.trace("Published messages to redis on channel: ", getRedisProcessedEventsChannelName(this.betProvider, parsedMessage.gameName, parsedMessage.betType));
         } else {
             const message = "Failed to get redis publisher to send processed events: ";
             logger.error(message, {

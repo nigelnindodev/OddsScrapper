@@ -8,7 +8,7 @@ import { TimeZones } from "../../../utils/types/common";
 
 const {logger} = getConfig();
 
-export function processOrbitThreeWayGamesHtml(html: string): Result<any[], Error> {
+export function processOrbitGamesHtml(html: string): Result<any[], Error> {
     const gameEvents: any[] = [];
 
     const $ = cheerio.load(html);

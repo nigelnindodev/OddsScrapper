@@ -1,8 +1,8 @@
 import { getConfig } from "../..";
 import { BetProvider } from "../../bet_providers";
 import { PostgresDataSourceSingleton } from "../../datastores/postgres";
-import { insertThreeWayGameEvent } from "../../datastores/postgres/queries/three_way_game_event";
-import { insertTwoWayGameEvent } from "../../datastores/postgres/queries/two_way_game_event";
+import { getThreeWayGame, insertThreeWayGameEvent } from "../../datastores/postgres/queries/three_way_game_event";
+import { getTwoWayGame, insertTwoWayGameEvent } from "../../datastores/postgres/queries/two_way_game_event";
 import { RedisSingleton } from "../../datastores/redis";
 import { getRedisProcessedEventsChannelName } from "../../utils/redis";
 import { BetTypes, ProcessedGameEvents } from "../../utils/types/common";
@@ -43,36 +43,47 @@ export abstract class BaseGameEventsProcessor {
 
         const results = getBetProviderConfigResult.value.games.map(async game => {
             await getRedisSubscriberResult.value.subscribe(getRedisProcessedEventsChannelName(this.betProvider, game.name, game.betType), async message => {
+                logger.trace("Listening for redis messages on channel: ", getRedisProcessedEventsChannelName(this.betProvider, game.name, game.betType));
                 const parsedMessage = JSON.parse(message) as ProcessedGameEvents;
 
                 const innerResults = parsedMessage.data.map(async item => {
                     switch (item.type) {
                         case BetTypes.TWO_WAY:
-                            await insertTwoWayGameEvent(getPostgresDbResult.value, {
-                                betProviderName: parsedMessage.betProviderName,
-                                betProviderId: item.betProviderId,
-                                clubA: item.clubA,
-                                clubB: item.clubB,
-                                oddsAWin: item.oddsAWin,
-                                oddsBWin: item.oddsBWin,
-                                gameName: parsedMessage.gameName,
-                                league: item.league,
-                                metaData: item.meta
-                            });
+                            const twoWayGame = await getTwoWayGame(getPostgresDbResult.value, item.betProviderId, parsedMessage.betProviderName);
+                            if (twoWayGame === null) {
+                                await insertTwoWayGameEvent(getPostgresDbResult.value, {
+                                    betProviderName: parsedMessage.betProviderName,
+                                    betProviderId: item.betProviderId,
+                                    clubA: item.clubA,
+                                    clubB: item.clubB,
+                                    oddsAWin: item.oddsAWin,
+                                    oddsBWin: item.oddsBWin,
+                                    gameName: parsedMessage.gameName,
+                                    league: item.league,
+                                    metaData: item.meta
+                                });
+                            } else {
+                                logger.trace("Two way game already exists: ", twoWayGame);
+                            }
                             break;
                         case BetTypes.THREE_WAY:
-                            await insertThreeWayGameEvent(getPostgresDbResult.value, {
-                                betProviderName: parsedMessage.betProviderName,
-                                betProviderId: item.betProviderId,
-                                clubA: item.clubA,
-                                clubB: item.clubB,
-                                oddsAWin: item.oddsAWin,
-                                oddsBWin: item.oddsBWin,
-                                oddsDraw: item.oddsDraw,
-                                gameName: parsedMessage.gameName,
-                                league: item.league,
-                                metaData: item.meta
-                            });
+                            const threeWayGame = await getThreeWayGame(getPostgresDbResult.value, item.betProviderId, parsedMessage.betProviderName);
+                            if (threeWayGame === null) {
+                                await insertThreeWayGameEvent(getPostgresDbResult.value, {
+                                    betProviderName: parsedMessage.betProviderName,
+                                    betProviderId: item.betProviderId,
+                                    clubA: item.clubA,
+                                    clubB: item.clubB,
+                                    oddsAWin: item.oddsAWin,
+                                    oddsBWin: item.oddsBWin,
+                                    oddsDraw: item.oddsDraw,
+                                    gameName: parsedMessage.gameName,
+                                    league: item.league,
+                                    metaData: item.meta
+                                });
+                            } else {
+                                logger.trace("Three way game already exists: ", threeWayGame);
+                            }
                             break;
                         default:
                             const message = `Unknown bet type encountered when saving processed game events to database.`;
