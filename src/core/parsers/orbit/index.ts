@@ -63,8 +63,8 @@ export class OrbitParser extends BaseParser {
                             betProviderId: `${item.clubA}_${item.clubB}_${item.eventDate}`, // TODO: create id creator on specific betProvider class
                             clubA: item.clubA,
                             clubB: item.clubB,
-                            oddsAWin: (item.oddsArray[0], item.oddsArray[1]) / 2,
-                            oddsBWin: (item.oddsArray[2], item.oddsArray[3]) / 2,
+                            oddsAWin: (item.oddsArray[0] + item.oddsArray[1]) / 2,
+                            oddsBWin: (item.oddsArray[2] + item.oddsArray[3]) / 2,
                             league: "N/A",
                             estimatedStartTimeUtc: item.estimatedStartTimeUtc,
                             meta: JSON.stringify({
@@ -86,9 +86,9 @@ export class OrbitParser extends BaseParser {
                             betProviderId: `${item.clubA}_${item.clubB}_${item.eventDate}`,
                             clubA: item.clubA,
                             clubB: item.clubB,
-                            oddsAWin: (item.oddsArray[0], item.oddsArray[1]) / 2,
-                            oddsBWin:(item.oddsArray[4], item.oddsArray[5]) / 2,
-                            oddsDraw: (item.oddsArray[2], item.oddsArray[3]) / 2,
+                            oddsAWin: (item.oddsArray[0] + item.oddsArray[1]) / 2,
+                            oddsBWin:(item.oddsArray[4] + item.oddsArray[5]) / 2,
+                            oddsDraw: (item.oddsArray[2] + item.oddsArray[3]) / 2,
                             league: "N/A",
                             estimatedStartTimeUtc: item.estimatedStartTimeUtc,
                             meta: JSON.stringify({
