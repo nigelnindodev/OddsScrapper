@@ -3,10 +3,10 @@ import { getConfig } from "../../..";
 import { BetProvider } from "../../../bet_providers";
 import { OrbitProvider } from "../../../bet_providers/orbit";
 import { RedisSingleton } from "../../../datastores/redis";
-import { getRedisHtmlParserChannelName } from "../../../utils/redis";
-import { BetTypes, RawHtmlForProcessingMessage } from "../../../utils/types/common";
+import { getRedisHtmlParserChannelName, getRedisProcessedEventsChannelName } from "../../../utils/redis";
+import { BetTypes, ProcessedThreeWayGameEvent, ProcessedTwoWayGameEvent, RawHtmlForProcessingMessage } from "../../../utils/types/common";
 import { Result } from "../../../utils/types/result_type";
-import { processOrbitThreeWayGamesHtml } from "./parser_types";
+import { processOrbitGamesHtml } from "./parser_types";
 
 const {logger} = getConfig();
 
@@ -50,15 +50,55 @@ export class OrbitParser extends BaseParser {
         }
     }
 
-    private processRawHtmlMessage(parsedMessage: RawHtmlForProcessingMessage): void {
+    private async processRawHtmlMessage(parsedMessage: RawHtmlForProcessingMessage): Promise<void> {
         let results2;
+        let parsedResults: ProcessedTwoWayGameEvent[] | ProcessedThreeWayGameEvent[];
         switch (parsedMessage.betType) {
-            case BetTypes.THREE_WAY:
-                results2 = processOrbitThreeWayGamesHtml(parsedMessage.rawHtml);
-                break;
             case BetTypes.TWO_WAY:
+                results2 = processOrbitGamesHtml(parsedMessage.rawHtml);
+                if (results2.result === "success") {
+                    parsedResults = results2.value.map(item => {
+                        return {
+                            type: BetTypes.TWO_WAY,
+                            betProviderId: `${item.clubA}_${item.clubB}_${item.eventDate}`, // TODO: create id creator on specific betProvider class
+                            clubA: item.clubA,
+                            clubB: item.clubB,
+                            oddsAWin: (item.oddsArray[0] + item.oddsArray[1]) / 2,
+                            oddsBWin: (item.oddsArray[2] + item.oddsArray[3]) / 2,
+                            league: "N/A",
+                            estimatedStartTimeUtc: item.estimatedStartTimeUtc,
+                            meta: JSON.stringify({
+                                oddsArray: item.oddsArray
+                            })
+                        };
+                    });
+                } else {
+                    throw new Error("Failed to process Orbit two way games html");
+                }
+                break;
+            case BetTypes.THREE_WAY:
                 // Thinking that the parser should also work for two way games
-                results2 = processOrbitThreeWayGamesHtml(parsedMessage.rawHtml);
+                results2 = processOrbitGamesHtml(parsedMessage.rawHtml);
+                if (results2.result === "success") {
+                    parsedResults = results2.value.map(item => {
+                        return {
+                            type: BetTypes.THREE_WAY,
+                            betProviderId: `${item.clubA}_${item.clubB}_${item.eventDate}`,
+                            clubA: item.clubA,
+                            clubB: item.clubB,
+                            oddsAWin: (item.oddsArray[0] + item.oddsArray[1]) / 2,
+                            oddsBWin:(item.oddsArray[4] + item.oddsArray[5]) / 2,
+                            oddsDraw: (item.oddsArray[2] + item.oddsArray[3]) / 2,
+                            league: "N/A",
+                            estimatedStartTimeUtc: item.estimatedStartTimeUtc,
+                            meta: JSON.stringify({
+                                oddsArray: item.oddsArray
+                            })
+                        }
+                    });
+                } else {
+                    throw new Error("Failed to process Orbit three way games html");
+                }
                 break;
             default:
                 const message = "Unknown bet type provided";
@@ -71,15 +111,29 @@ export class OrbitParser extends BaseParser {
                 throw new Error(`Unknown bet type provided for provider: ${this.betProvider.name}`);
         }
 
-        if (results2.result === "success") {
-            logger.info("Successfully fetched games", results2.value);
+        logger.info("Successfully fetched games", results2.value);
+        const getRedisPublisherResult = await RedisSingleton.getPublisher();
+
+        if (getRedisPublisherResult.result === "success") {
+            this.publishProcessedGameEvents(
+                getRedisPublisherResult.value,
+                getRedisProcessedEventsChannelName(this.betProvider, parsedMessage.gameName, parsedMessage.betType),
+                {
+                    betProviderName: parsedMessage.betProviderName,
+                    betType: parsedMessage.betType,
+                    gameName: parsedMessage.gameName,
+                    data: parsedResults
+                }
+            );
+            logger.trace("Published messages to redis on channel: ", getRedisProcessedEventsChannelName(this.betProvider, parsedMessage.gameName, parsedMessage.betType));
         } else {
-            logger.error("Failed to parse html into games: ", {
+            const message = "Failed to get redis publisher to send processed events: ";
+            logger.error(message, {
                 betProviderName: parsedMessage.betProviderName,
                 betType: parsedMessage.betType,
                 fromUrl: parsedMessage.fromUrl,
                 gameName: parsedMessage.gameName,
-                errorMessage: results2.value.message
+                errorMessage: getRedisPublisherResult.value.message
             });
         }
     }

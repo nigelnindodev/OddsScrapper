@@ -1,12 +1,12 @@
 import { BaseGameEventsProcessor } from "..";
 import { BetProvider } from "../../../bet_providers";
-import { BetikaProvider } from "../../../bet_providers/betika";
+import { OrbitProvider } from "../../../bet_providers/orbit";
 
-export class BetikaGameEventsProcessor extends BaseGameEventsProcessor {
+export class OrbitGameEventsProcessor extends BaseGameEventsProcessor {
     public override betProvider: BetProvider;
 
     constructor() {
         super();
-        this.betProvider = new BetikaProvider();
+        this.betProvider = new OrbitProvider();
     }
 }

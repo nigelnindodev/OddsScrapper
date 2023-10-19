@@ -125,10 +125,10 @@ export class BetikaParser extends BaseParser {
                 getRedisPublisherResult.value,
                 getRedisProcessedEventsChannelName(this.betProvider, parsedMessage.gameName, parsedMessage.betType),
                 {
-                betProviderName: parsedMessage.betProviderName,
-                betType: parsedMessage.betType,
-                gameName: parsedMessage.gameName,
-                data: parsedResults
+                    betProviderName: parsedMessage.betProviderName,
+                    betType: parsedMessage.betType,
+                    gameName: parsedMessage.gameName,
+                    data: parsedResults
                 });
         } else {
             const message = "Failed to get redis publisher to send processed events: ";
