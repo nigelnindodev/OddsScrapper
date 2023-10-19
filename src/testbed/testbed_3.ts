@@ -1,4 +1,4 @@
-import { BetikaGameEventsProcessor } from "../core/game_events/betika";
+import { OrbitGameEventsProcessor } from "../core/game_events/orbit";
 
-const gameEventsProcessor = new BetikaGameEventsProcessor();
-gameEventsProcessor.subscribeToChannels();
+const gameEventsProcessor = new OrbitGameEventsProcessor();
+gameEventsProcessor.initGameEventsListener();

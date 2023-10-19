@@ -83,7 +83,7 @@ export function processOrbitThreeWayGamesHtml(html: string): Result<any[], Error
         });
 
         finalMapping = finalMapping.map(item => {
-            return {...item, ...{eventDate: momentTz(`${item.startDate} ${item.parsedTime[0]}`, "ddd DD MMM HH:mm").toDate()}};
+            return {...item, ...{estimatedStartTimeUtc: momentTz(`${item.startDate} ${item.parsedTime[0]}`, "ddd DD MMM HH:mm").toDate()}};
         });
 
         logger.trace(finalMapping);
