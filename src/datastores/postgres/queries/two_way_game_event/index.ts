@@ -40,6 +40,7 @@ export const insertTwoWayGameEvent = async (
         odds_b_win: data.oddsBWin,
         game_name: data.gameName,
         league: data.league,
+        estimated_start_time_utc: data.estimatedStartTimeUtc,
         meta_data: data.metaData
     })
     .execute();

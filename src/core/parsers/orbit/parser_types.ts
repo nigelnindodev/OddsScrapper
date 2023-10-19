@@ -86,6 +86,31 @@ export function processOrbitGamesHtml(html: string): Result<any[], Error> {
             return {...item, ...{estimatedStartTimeUtc: momentTz(`${item.startDate} ${item.parsedTime[0]}`, "ddd DD MMM HH:mm").toDate()}};
         });
 
+        // remove game events with missing odds
+        finalMapping = finalMapping.filter(event => {
+            let allOddsAreNumbers = true;
+
+            //@ts-ignore
+            event.oddsArray.forEach(odd => {
+                if (isNaN(odd)) {
+                    logger.warn("Ignoring game event where not all odds are numbers: ", event);
+                    allOddsAreNumbers = false;
+                }
+            });
+
+            return allOddsAreNumbers;
+        });
+
+        // remove game events where the date could not be parsed
+        finalMapping = finalMapping.filter(event => {
+            if (event.estimatedStartTimeUtc === undefined) {
+                logger.warn("Ignoring game event where failed to parse estimatedStartTimeUtc: ", event);
+                return false;
+            } else {
+                return true;
+            }
+        });
+
         logger.trace(finalMapping);
 
         return {result: "success", value: finalMapping};

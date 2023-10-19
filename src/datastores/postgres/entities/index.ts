@@ -15,9 +15,11 @@ export class TwoWayGameEventEntity {
     @Column("varchar", {length: 100, nullable: false})
     bet_provider_id: string
 
+    @Index("two_way_game_event_club_a_idx")
     @Column("varchar", {length: 100, nullable: false})
     club_a: string
 
+    @Index("two_way_game_event_club_b_idx")
     @Column("varchar", {length: 100, nullable: false})
     club_b: string
 
@@ -40,7 +42,10 @@ export class TwoWayGameEventEntity {
     @Column("json", {nullable: false})
     meta_data: string
 
-    @Index("two_way_game_event_created_at_idx")
+    @Index("two_way_game_event_estimated_start_time_utc_idx")
+    @Column("timestamptz", {nullable: false})
+    estimated_start_time_utc: Date
+
     @Column("timestamptz", {nullable: false, default: () => "CURRENT_TIMESTAMP"})
     created_at_utc: Date
 
@@ -62,9 +67,11 @@ export class ThreeWayGameEventEntity {
     @Column("varchar", {length: 100, nullable: false})
     bet_provider_id: string
 
+    @Index("three_way_game_event_club_a_idx")
     @Column("varchar", {length: 100, nullable: false})
     club_a: string
 
+    @Index("three_way_game_event_club_b_idx")
     @Column("varchar", {length: 100, nullable: false})
     club_b: string
 
@@ -90,7 +97,10 @@ export class ThreeWayGameEventEntity {
     @Column("json", {nullable: false})
     meta_data: string
 
-    @Index("three_way_game_event_created_at_idx")
+    @Index("three_way_game_event_estimated_start_time_utc_idx")
+    @Column("timestamptz", {nullable: false})
+    estimated_start_time_utc: Date
+
     @Column("timestamptz", {nullable: false, default: () => "CURRENT_TIMESTAMP"})
     created_at_utc: Date
 
