@@ -3,6 +3,7 @@
         "BETIKA",
         "Millis",
         "SPORTPESA",
+        "timestamptz",
         "typeorm"
     ]
 }

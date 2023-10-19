@@ -15,6 +15,7 @@ export interface DbTwoWayGameEvent {
     oddsBWin: number;
     gameName: Games;
     league: string;
+    estimatedStartTimeUtc: Date;
     metaData: string;
 }
 
@@ -28,5 +29,6 @@ export interface DbThreeWayGameEvent {
     oddsDraw: number;
     gameName: Games;
     league: string;
+    estimatedStartTimeUtc: Date,
     metaData: string;
 }

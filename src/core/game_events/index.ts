@@ -60,6 +60,7 @@ export abstract class BaseGameEventsProcessor {
                                     oddsBWin: item.oddsBWin,
                                     gameName: parsedMessage.gameName,
                                     league: item.league,
+                                    estimatedStartTimeUtc: item.estimatedStartTimeUtc,
                                     metaData: item.meta
                                 });
                             } else {
@@ -79,6 +80,7 @@ export abstract class BaseGameEventsProcessor {
                                     oddsDraw: item.oddsDraw,
                                     gameName: parsedMessage.gameName,
                                     league: item.league,
+                                    estimatedStartTimeUtc: item.estimatedStartTimeUtc,
                                     metaData: item.meta
                                 });
                             } else {
