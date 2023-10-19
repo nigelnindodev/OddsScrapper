@@ -4,7 +4,7 @@ import { BetProvider } from "../../../bet_providers";
 import { OrbitProvider } from "../../../bet_providers/orbit";
 import { RedisSingleton } from "../../../datastores/redis";
 import { getRedisHtmlParserChannelName } from "../../../utils/redis";
-import { PuppeteerPageLoadPolicy } from "../../../utils/types/common";
+import { BetProviderGameConfig, PuppeteerPageLoadPolicy } from "../../../utils/types/common";
 import { Result } from "../../../utils/types/result_type";
 import { getHtmlForScrollingPage } from "../scrolling_scrapper";
 
@@ -39,7 +39,7 @@ export class OrbitScrapper extends BaseScrapper {
             const betProviderConfig = getBetProviderConfigResult.value;
             const browserInstance = await this.initializeBrowserInstance();
 
-            const result = betProviderConfig.games.map(async game => {
+            const results = await this.mapSeries(betProviderConfig.games, async (game) => {
                 const metadata = {
                     betProviderName: this.betProvider.name,
                     game: game.name,
@@ -75,10 +75,10 @@ export class OrbitScrapper extends BaseScrapper {
                     logger.error("An error occurred while fetching html for page", metadata);
                 }
 
-                return undefined;
+                return true;
             });
 
-            await Promise.all(result);
+            logger.trace("Data fetch results: ", results);
             await browserInstance.close();
 
             return {
@@ -88,5 +88,15 @@ export class OrbitScrapper extends BaseScrapper {
         } else {
             return getRedisPublisherResult;
         }
+    }
+
+    private async mapSeries(iterable: Iterable<BetProviderGameConfig>, fn: (game: BetProviderGameConfig) => Promise<boolean>) {
+        const results: boolean[] = [];
+
+        for (const x of iterable) {
+            results.push(await fn(x))
+        }
+
+        return results;
     }
 }

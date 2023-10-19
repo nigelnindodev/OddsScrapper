@@ -29,7 +29,8 @@ export class OrbitParser extends BaseParser {
         const getRedisSubscriberResult = await RedisSingleton.getSubscriber();
         if (getRedisSubscriberResult.result === "success") {
             const betProviderConfig = getBetProviderConfigResult.value;
-            const results = betProviderConfig.games.map(async game => {
+
+            betProviderConfig.games.forEach(async game => {
                 await getRedisSubscriberResult.value.subscribe(getRedisHtmlParserChannelName(this.betProvider, game), message => {
                     const parsedMessage = JSON.parse(message) as RawHtmlForProcessingMessage;
                     logger.trace("Redis subscriber message received.", {
@@ -42,7 +43,7 @@ export class OrbitParser extends BaseParser {
                 });
                 return true;
             });
-            await Promise.all(results);
+
             return {result: "success", value: true};
         } else {
             logger.error("HTML parser failed to connect to redis subscriber for bet provider: ", this.betProvider.name);
@@ -68,7 +69,8 @@ export class OrbitParser extends BaseParser {
                             league: "N/A",
                             estimatedStartTimeUtc: item.estimatedStartTimeUtc,
                             meta: JSON.stringify({
-                                oddsArray: item.oddsArray
+                                oddsArray: item.oddsArray,
+                                numBets: item.numBets
                             })
                         };
                     });
@@ -92,7 +94,8 @@ export class OrbitParser extends BaseParser {
                             league: "N/A",
                             estimatedStartTimeUtc: item.estimatedStartTimeUtc,
                             meta: JSON.stringify({
-                                oddsArray: item.oddsArray
+                                oddsArray: item.oddsArray,
+                                numBets: item.numBets
                             })
                         }
                     });
