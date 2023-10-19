@@ -45,6 +45,7 @@ export const insertThreeWayGameEvent = async (
         odds_draw: data.oddsDraw,
         game_name: data.gameName,
         league: data.league,
+        estimated_start_time_utc: data.estimatedStartTimeUtc,
         meta_data: data.metaData
     })
     .execute();
