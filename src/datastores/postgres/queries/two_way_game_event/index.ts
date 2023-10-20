@@ -1,7 +1,12 @@
+import moment from "moment";
+
 import { DataSource, InsertResult, UpdateResult } from "typeorm";
 import { BetProviders } from "../../../../utils/types/common";
 import { DbTwoWayGameEvent } from "../../../../utils/types/db";
 import { TwoWayGameEventEntity } from "../../entities";
+import { getConfig } from "../../../..";
+
+const {logger} = getConfig();
 
 /**
  * Useful for checking whether a two way game event already exists for a provider.
@@ -22,6 +27,19 @@ export const getTwoWayGame = async (
     .where("bet_provider_id = :betProviderId", {betProviderId: betProviderId})
     .andWhere("bet_provider_name = :betProviderName", {betProviderName})
     .getOne();
+};
+
+export const getAnalyzableTwoWayGames = async (
+    dataSource: DataSource
+): Promise<TwoWayGameEventEntity[]> => {
+    logger.trace("Fetching analyzable two way games.");
+    const currentDate = moment().format();
+    logger.trace("current date time: ", currentDate);
+    return await dataSource.createQueryBuilder()
+    .select("two_way_game_event")
+    .from(TwoWayGameEventEntity, "two_way_game_event")
+    .where("estimated_start_time_utc > :currentDate", {currentDate: currentDate})
+    .getMany();
 };
 
 export const insertTwoWayGameEvent = async (

@@ -1,3 +1,5 @@
+import moment from "moment";
+
 import { DataSource, InsertResult, UpdateResult } from "typeorm";
 import { BetProviders } from "../../../../utils/types/common";
 import { DbThreeWayGameEvent } from "../../../../utils/types/db";
@@ -25,6 +27,17 @@ export const getThreeWayGame = async (
     .where("bet_provider_id = :betProviderId", {betProviderId: betProviderId})
     .andWhere("bet_provider_name = :betProviderName", {betProviderName})
     .getOne();
+};
+
+export const getAnalyzableThreeWayGames = async (
+    dataSource: DataSource
+): Promise<ThreeWayGameEventEntity[]> => {
+    const currentDate = moment().format();
+    return await dataSource.createQueryBuilder()
+    .select("three_way_game_event")
+    .from(ThreeWayGameEventEntity, "three_way_game_event")
+    .where("estimated_start_time_utc > :currentDate", {currentDate: currentDate})
+    .getMany();
 };
 
 export const insertThreeWayGameEvent = async (
