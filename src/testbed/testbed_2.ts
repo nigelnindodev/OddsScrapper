@@ -1,4 +1,4 @@
-import { OrbitParser } from "../core/parsers/orbit";
+import { BetikaParser } from "../core/parsers/betika";
 
-const parser = new OrbitParser()
+const parser = new BetikaParser()
 parser.subscribeToChannels();

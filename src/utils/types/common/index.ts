@@ -7,8 +7,8 @@ export enum BetProviders {
 export enum Games {
     BASKETBALL = "BasketBall",
     FOOTBALL = "Football",
-    TENNIS_SINGLES = "Tennis Singles", // TODO: Add string trimming here
-    TENNIS_DOUBLES = "Tennis Doubles"
+    TENNIS_SINGLES = "Tennis",
+    CRICKET = "Cricket"
 }
 
 export enum BetTypes {

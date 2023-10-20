@@ -10,6 +10,11 @@
             "name": "Tennis",
             "betType": "Two Way",
             "url": "https://www.orbitxch.com/customer/sport/2"
+        },
+        {
+            "name": "Basketball",
+            "betType": "Two Way",
+            "url": "https://www.orbitxch.com/customer/sport/7522"
         }
     ]
 }
