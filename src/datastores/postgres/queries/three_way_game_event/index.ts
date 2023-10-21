@@ -1,3 +1,5 @@
+import moment from "moment";
+
 import { DataSource, InsertResult, UpdateResult } from "typeorm";
 import { BetProviders } from "../../../../utils/types/common";
 import { DbThreeWayGameEvent } from "../../../../utils/types/db";
@@ -25,6 +27,59 @@ export const getThreeWayGame = async (
     .where("bet_provider_id = :betProviderId", {betProviderId: betProviderId})
     .andWhere("bet_provider_name = :betProviderName", {betProviderName})
     .getOne();
+};
+
+/**
+ * Fetches games where have true probabilities. Current fetched from Orbit bet provider.
+ * Plans to add Pinnacle sports later.
+ * @param dataSource 
+ * @returns 
+ */
+export const getAnalyzableThreeWayGames = async (
+    dataSource: DataSource
+): Promise<ThreeWayGameEventEntity[]> => {
+    const currentDate = moment().format();
+    return await dataSource.createQueryBuilder()
+    .select("three_way_game_event")
+    .from(ThreeWayGameEventEntity, "three_way_game_event")
+    .where("estimated_start_time_utc > :currentDate", {currentDate: currentDate})
+    .where("bet_provider_name = :betProviderName", {betProviderName: BetProviders.ORBIT})
+    .getMany();
+};
+
+/**
+ * Fetch game events that are similar to selected game event from provider.
+ * Excludes the same event from provider being picked.
+ * Returns null if there are no other matching events found.
+ * Adding null here to make it explicit that th no values can be expected.
+ * @param dataSource 
+ * @param event 
+ * @returns 
+ */
+export const getMatchingThreeWayGameEventsTrigram = async (
+    dataSource: DataSource,
+    event: ThreeWayGameEventEntity
+): Promise<ThreeWayGameEventEntity[] | null> => {
+    //@ts-ignore
+    const currentDate = moment().format();
+
+    const results = await dataSource.createQueryBuilder()
+    .select("three_way_game_event")
+    .from(ThreeWayGameEventEntity, "three_way_game_event")
+    //.where("estimated_start_time_utc > :currentDate", {currentDate: currentDate}) TODO: Add before final commit
+    .where("bet_provider_name != :betProviderName", {betProviderName: event.bet_provider_name})
+    .andWhere("similarity(club_a, :clubAName) > 0.2", {clubAName: event.club_a})
+    .andWhere("similarity(club_b, :clubBName) > 0.2", {clubBName: event.club_b})
+    .getMany();
+
+    logger.trace("clubA: ", event.club_a);
+    logger.trace("clubB: ", event.club_b);
+
+    if (results.length === 0) {
+        return null;
+    } else {
+        return results;
+    }
 };
 
 export const insertThreeWayGameEvent = async (

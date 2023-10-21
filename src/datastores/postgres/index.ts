@@ -11,8 +11,8 @@ export class PostgresDataSourceSingleton {
     private constructor() {}
 
     public static async getInstance(config: Config): Promise<Result<DataSource, Error>> {
-        logger.trace("Opening Postgres TypeORM data source");
         if (!PostgresDataSourceSingleton.dataSource) {
+            logger.info("Creating postgres data source");
             const candidateDataSource = new DataSource({
                 type: "postgres",
                 host: config.postgresHost,

@@ -1,4 +1,4 @@
-import { OrbitScrapper } from "../core/scrapping/orbit";
+import { BetikaScrapper } from "../core/scrapping/betika";
 
-const scrapper = new OrbitScrapper();
+const scrapper = new BetikaScrapper();
 scrapper.fetchData();

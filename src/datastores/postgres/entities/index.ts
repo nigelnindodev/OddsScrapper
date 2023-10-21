@@ -107,3 +107,5 @@ export class ThreeWayGameEventEntity {
     @Column("timestamptz", {nullable: false, default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP"})
     updated_at_utc: Date
 }
+
+export type GameEventEntityTypes = TwoWayGameEventEntity | ThreeWayGameEventEntity;
