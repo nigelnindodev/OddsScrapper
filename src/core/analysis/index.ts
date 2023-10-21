@@ -8,6 +8,23 @@ import { getAnalyzableThreeWayGames, getMatchingThreeWayGameEventsTrigram } from
 const {logger} = getConfig();
 
 export class BaseAnalyser {
+
+    private getWinnings(stake: number, oddsForEvent: number): number {
+        const totalWithdrawableOnWin = stake * oddsForEvent;
+        return totalWithdrawableOnWin - stake;
+    }
+
+    /**
+     * Gets the expected value of staking on an event.
+     * Positive and higher results are better;
+     * @param probabilityOfEvent "True" Probability between 0 and 1.
+     * @param oddsForEvent Odds by the bet provider for the event.
+     */
+    protected getEventEvPercent(probabilityOfEvent: number, oddsForEvent: number): number {
+        const theoreticalStake = 10;
+        const evAsNumber = (this.getWinnings(theoreticalStake, oddsForEvent) * probabilityOfEvent) - (theoreticalStake * (1-probabilityOfEvent));
+        return evAsNumber; // TODO: Return as a percentage
+    }
     /**
      * Get two way game events that can be analyzed.
      * Analyzable data is the data where the start event is greater than the current time.
