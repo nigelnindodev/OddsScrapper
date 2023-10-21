@@ -1,4 +1,4 @@
-import { TwoWayAnalyser } from "../core/analysis/two_way";
+import { ThreeWayAnalyzer } from "../core/analysis/three_way";
 
-const analyzer = new TwoWayAnalyser();
+const analyzer = new ThreeWayAnalyzer();
 analyzer.getData();

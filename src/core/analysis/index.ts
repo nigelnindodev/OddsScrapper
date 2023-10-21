@@ -1,9 +1,9 @@
 import { getConfig } from "../..";
 import { PostgresDataSourceSingleton } from "../../datastores/postgres";
-import { GameEventEntityTypes, ThreeWayGameEventEntity, TwoWayGameEventEntity } from "../../datastores/postgres/entities";
+import { ThreeWayGameEventEntity, TwoWayGameEventEntity } from "../../datastores/postgres/entities";
 import { getAnalyzableTwoWayGames, getMatchingTwoWayGameEventsTrigram } from "../../datastores/postgres/queries/two_way_game_event";
 import { Result } from "../../utils/types/result_type";
-import { getAnalyzableThreeWayGames } from "../../datastores/postgres/queries/three_way_game_event";
+import { getAnalyzableThreeWayGames, getMatchingThreeWayGameEventsTrigram } from "../../datastores/postgres/queries/three_way_game_event";
 
 const {logger} = getConfig();
 
@@ -48,7 +48,7 @@ export class BaseAnalyser {
         }
     }
 
-    protected async getMatchingGameEvents(gameEvent: GameEventEntityTypes): Promise<Result<GameEventEntityTypes[] | null, Error>> {
+    protected async getMatchingTwoWayGameEvents(gameEvent: TwoWayGameEventEntity): Promise<Result<TwoWayGameEventEntity[] | null, Error>> {
         const getPostgresDataSourceResult = await PostgresDataSourceSingleton.getInstance(getConfig());
         if (getPostgresDataSourceResult.result === "error") {
             const message = "Failed to get postgres data source when fetching matching game events for analysis";
@@ -58,6 +58,20 @@ export class BaseAnalyser {
             return {
                 result: "success",
                 value: await getMatchingTwoWayGameEventsTrigram(getPostgresDataSourceResult.value, gameEvent)
+            };
+        }
+    }
+
+    protected async getMatchingThreeWayGameEvents(gameEvent: ThreeWayGameEventEntity): Promise<Result<ThreeWayGameEventEntity[] | null, Error>> {
+        const getPostgresDataSourceResult = await PostgresDataSourceSingleton.getInstance(getConfig());
+        if (getPostgresDataSourceResult.result === "error") {
+            const message = "Failed to get postgres data source when fetching matching game events for analysis";
+            logger.error(message);
+            return getPostgresDataSourceResult;
+        } else {
+            return {
+                result: "success",
+                value: await getMatchingThreeWayGameEventsTrigram(getPostgresDataSourceResult.value, gameEvent)
             };
         }
     }

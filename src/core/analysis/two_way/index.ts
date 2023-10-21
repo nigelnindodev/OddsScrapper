@@ -13,7 +13,7 @@ export class TwoWayAnalyser extends BaseAnalyser {
         }
 
         getEventDataResult.value.map(async event => {
-            const matchingEvents = await this.getMatchingGameEvents(event);
+            const matchingEvents = await this.getMatchingTwoWayGameEvents(event);
             logger.info("Event: ", event);
             logger.info("Matching events: ", matchingEvents);
         });

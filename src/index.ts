@@ -82,3 +82,14 @@ export function removeUnnecessaryClubTags(possibleTags: string[]): string[] {
         return identifiers;
     }
 }
+
+/**
+ * Rounds a number to given decimal places according to the multiplier.
+ * For example, a multiplier of 10 returns to 1 decimal place while 100 2 decimal places.
+ * @param value 
+ * @param multiplier 
+ * @returns 
+ */
+export const roundNumber = (value: number, multiplier: number): number => {
+    return Math.round((value + Number.EPSILON) * multiplier) / multiplier ;
+};
