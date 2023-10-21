@@ -4,7 +4,7 @@ import { DataSource, InsertResult, UpdateResult } from "typeorm";
 import { BetProviders } from "../../../../utils/types/common";
 import { DbThreeWayGameEvent } from "../../../../utils/types/db";
 import { ThreeWayGameEventEntity } from "../../entities";
-import { getConfig } from "../../../..";
+import { addStringQueryConditionals, getConfig, removeUnnecessaryClubTags } from "../../../..";
 
 const {logger} = getConfig();
 
@@ -29,6 +29,12 @@ export const getThreeWayGame = async (
     .getOne();
 };
 
+/**
+ * Fetches games where have true probabilities. Current fetched from Orbit bet provider.
+ * Plans to add Pinnacle sports later.
+ * @param dataSource 
+ * @returns 
+ */
 export const getAnalyzableThreeWayGames = async (
     dataSource: DataSource
 ): Promise<ThreeWayGameEventEntity[]> => {
@@ -37,7 +43,45 @@ export const getAnalyzableThreeWayGames = async (
     .select("three_way_game_event")
     .from(ThreeWayGameEventEntity, "three_way_game_event")
     .where("estimated_start_time_utc > :currentDate", {currentDate: currentDate})
+    .where("bet_provider_name = :betProviderName", {betProviderName: BetProviders.ORBIT})
     .getMany();
+};
+
+/**
+ * Fetch game events that are similar to selected game event from provider.
+ * Excludes the same event from provider being picked.
+ * Returns null if there are no other matching events found.
+ * Adding null here to make it explicit that th no values can be expected.
+ * @param dataSource 
+ * @param event 
+ */
+export const getMatchingThreeWayEvents = async (
+    dataSource: DataSource,
+    event: ThreeWayGameEventEntity
+): Promise<ThreeWayGameEventEntity[] | null> => {
+    const currentDate = moment().format();
+    const clubANames = removeUnnecessaryClubTags(event.club_a.split(" "));
+    const clubBNames = removeUnnecessaryClubTags(event.club_b.split(" ")) ;
+
+    const preQuery = dataSource.createQueryBuilder()
+    .select("three_way_game_event")
+    .from(ThreeWayGameEventEntity, "three_way_game_event")
+    .where("estimated_start_time_utc > :currentDate", {currentDate: currentDate})
+    .andWhere("bet_provider_name != :betProviderName", {betProviderName: event.bet_provider_name});
+
+    const results = await addStringQueryConditionals(
+        [
+            {columnName: "club_a", values: clubANames},
+            {columnName: "club_b", values: clubBNames}
+        ],
+         preQuery
+    ).getMany();
+    
+    if (results.length === 0) {
+        return null;
+    } else {
+        return results;
+    }
 };
 
 export const insertThreeWayGameEvent = async (
