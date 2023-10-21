@@ -38,6 +38,8 @@ export class TwoWayAnalyser extends BaseAnalyser {
         });
 
         await Promise.all(results);
-        logger.info("Game events with EV: ", gameEventsWithEv);
+        gameEventsWithEv.forEach(eventWithEv => {
+            logger.info("Game event with EV: ", eventWithEv);
+        });
     }
 }
