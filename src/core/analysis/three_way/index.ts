@@ -42,6 +42,5 @@ export class ThreeWayAnalyzer extends BaseAnalyser {
 
         await Promise.all(results);
         logger.info("Game events with EV: ", gameEventsWithEv);
-    }
-    
+    }    
 }
