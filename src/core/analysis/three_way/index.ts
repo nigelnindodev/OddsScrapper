@@ -6,7 +6,7 @@ const {logger} = getConfig();
 
 export class ThreeWayAnalyzer extends BaseAnalyser {
     public async getData() {
-        const gameEventsWithEv: {clubAWinEv: number, clubBWinEv: number, drawEv: number, event: ThreeWayGameEventEntity}[] = [];
+        const gameEventsWithEv: {clubAWinEv: number, clubBWinEv: number, drawEv: number, event: ThreeWayGameEventEntity, trueEvent: ThreeWayGameEventEntity}[] = [];
 
         const getEventDataResult = await this.getThreeWayGameEventData();
 
@@ -34,7 +34,8 @@ export class ThreeWayAnalyzer extends BaseAnalyser {
                     clubAWinEv,
                     clubBWinEv,
                     drawEv,
-                    event: gameEvent
+                    event: gameEvent,
+                    trueEvent: event
                    });
                 });
             }

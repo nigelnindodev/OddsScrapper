@@ -23,7 +23,7 @@ export class BaseAnalyser {
     protected getEventEvPercent(probabilityOfEvent: number, oddsForEvent: number): number {
         const theoreticalStake = 10;
         const evAsNumber = (this.getWinnings(theoreticalStake, oddsForEvent) * probabilityOfEvent) - (theoreticalStake * (1-probabilityOfEvent));
-        return evAsNumber; // TODO: Return as a percentage
+        return (evAsNumber / theoreticalStake) * 100; // TODO: Return as a percentage
     }
     /**
      * Get two way game events that can be analyzed.

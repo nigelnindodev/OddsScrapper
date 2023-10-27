@@ -62,14 +62,13 @@ export const getMatchingTwoWayGameEventsTrigram = async (
     dataSource: DataSource,
     event: TwoWayGameEventEntity
 ): Promise<TwoWayGameEventEntity[] | null> => {
-    //@ts-ignore
     const currentDate = moment().format();
 
     const results = await dataSource.createQueryBuilder()
     .select("two_way_game_event")
     .from(TwoWayGameEventEntity, "two_way_game_event")
-    //.where("estimated_start_time_utc > :currentDate", {currentDate: currentDate}) TODO: Add before final commit
-    .where("bet_provider_name != :betProviderName", {betProviderName: event.bet_provider_name})
+    .where("estimated_start_time_utc > :currentDate", {currentDate: currentDate})
+    .andWhere("bet_provider_name != :betProviderName", {betProviderName: event.bet_provider_name})
     .andWhere("similarity(club_a, :clubAName) > 0.2", {clubAName: event.club_a})
     .andWhere("similarity(club_b, :clubBName) > 0.2", {clubBName: event.club_b})
     .getMany();
