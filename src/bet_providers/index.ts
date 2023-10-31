@@ -1,6 +1,6 @@
 import { getConfig } from "..";
 import { readFileAsync } from "../utils/file_system";
-import { BetProviderConfig, BetProviderGameConfig, BetProviders, Games } from "../utils/types/common";
+import { BetProviderConfig, BetProviderGameConfig, BetProviders } from "../utils/types/common";
 import { Result } from "../utils/types/result_type";
 
 const {logger} = getConfig();
