@@ -14,8 +14,6 @@ export abstract class BetProvider {
         this.configPath = configPath;
     }
 
-    abstract getSupportedGames(): Games[]
-
     public async getConfig(): Promise<Result<BetProviderConfig, Error>> {
         const readFileResult = await readFileAsync(this.configPath);
         if (readFileResult.result === "success") {
